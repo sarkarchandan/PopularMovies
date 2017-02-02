@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#C62828</color>
+    <color name="colorPrimaryDark">#B71C1C</color>
+    <color name="colorAccent">#373F51</color>
+    <color name="colorMovieCard">#373F51</color>
+    <color name="black_alpha_40">#66000000</color>
+    <color name="color_movie">#212121</color>
+    <color name="movieInfo">#FAFAFA</color>
+    <color name="titleColor">#FAFAFA</color>
+</resources>

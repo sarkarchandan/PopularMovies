@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item android:title="@string/popular_movies"
+        android:id="@+id/mainActivityMenuItem_popular"
+        android:orderInCategory="1" />
+    <item android:title="@string/top_rated_movies"
+        android:id="@+id/mainActivityMenuItem_topRated"
+        android:orderInCategory="2"/>
+    <item android:title="@string/action_refresh"
+        android:id="@+id/mainActivityMenuItem_refresh"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_refresh_white_24dp"/>
+</menu>
