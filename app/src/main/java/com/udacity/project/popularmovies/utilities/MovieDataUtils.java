@@ -36,8 +36,9 @@ public class MovieDataUtils {
     /*Query Parameter name for Api Key*/
     private static final String KEY_QUERY_PARAM = "api_key";
 
+
     /*Your API Key goes here*/
-    private static final String API_KEY = "########";
+    private static final String API_KEY = "###############";
 
     /**
      * Method buildMovieDataRequestURL takes a String parameter which determines which kind of data we would like to
