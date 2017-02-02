@@ -1,13 +1,10 @@
 package com.udacity.project.popularmovies.utilities;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.util.Log;
-
-import com.udacity.project.popularmovies.R;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +35,7 @@ public class MovieDataUtils {
 
 
     /*Your API Key goes here*/
-    private static final String API_KEY = "###############";
+    private static final String API_KEY = "####################";
 
     /**
      * Method buildMovieDataRequestURL takes a String parameter which determines which kind of data we would like to

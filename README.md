@@ -37,7 +37,7 @@
 	: git clone https://github.com/sarkarchandan/PopularMovies.git
 - Import the project in the Android Studio and go to the MovieDataUtils class inside the package com.udacity.project.popularmovies.utilities.
 	:package com.udacity.project.popularmovies.utilities.MovieDataUtils class 
-- Place the obtained api-key to field static final String field API-KEY marked as this:
+- Replace the obtained api-key to static final String field API-KEY marked as this:
 /*Your API Key goes here*/
 private static final String API_KEY = "###############";
 - Build in Android Studio and run the App in the Android Emulator or any android device.
@@ -57,7 +57,7 @@ private static final String API_KEY = "###############";
    tools:layout_constraintLeft_creator="1"
    app:layout_constraintTop_toTopOf="parent" />
 ```
-I have noticed that while altering any other view for this activity layout(activity_detail.xml) from the design tab, the toolbar ```layout_height``` and ```layout_width``` attributes are automatically reset to 0dp, making the toolbar disappear. Hence, frequently, when I make some changes in the layout design, before running the app I need to check the toolbar ```include``` tag and correct the unexpected changes.
-- DetailActivity design with ConstraintLayout behaves perfectly alright when I execute my app in the Android Emulator running on Nexus 5x API 25 and powered by Android 7.1.1 Nougat. But while testing the app in my motorola(G series 2nd generation) device currently running on Marshmallow, the TextViews with longer texts, some portion of the texts frequently go off the screen. I have not been able to fix this behavior despite many attempts.
+I have noticed that while altering any other view for this activity layout(activity_detail.xml) from the design tab, for the toolbar ```layout_height``` and ```layout_width``` attributes automatically appear and are reset to 0dp, making the toolbar disappear. Hence, frequently, when I make some changes in the layout design, before running the app I need to check the toolbar ```include``` tag and correct the unexpected changes.
+- DetailActivity design with ConstraintLayout behaves perfectly alright when I execute my app in the Android Emulator running on Nexus 5x API 25 and powered by Android 7.1.1 Nougat, as I have posted the images. But while testing the app in my motorola(G series 2nd generation) device currently running on Marshmallow, for the TextViews with longer texts, some portion of the texts frequently go off the screen. I have not been able to fix this behavior despite many attempts.
 
-I will be waiting for any improvemnt suggestions on the current state of my app.
+I will be waiting for any fix and improvemnt suggestions on the current state of my app.
