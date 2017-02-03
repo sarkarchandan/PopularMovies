@@ -69,7 +69,11 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
     public void onBindViewHolder(MovieDataViewHolder holder, int position) {
         Movie movieItem = movieList.get(position);
         Picasso.with(context).setLoggingEnabled(true);
-        Picasso.with(context).load(movieItem.getMoviePosterUrl()).into(holder.imageView_movie_card_moviePoster);
+        Picasso.with(context)
+                .load(movieItem.getMoviePosterUrl())
+                .placeholder(R.drawable.placeholder_small_stacked_blue)
+                .error(R.drawable.placeholder_small_stacked_blue)
+                .into(holder.imageView_movie_card_moviePoster);
     }
 
     @Override

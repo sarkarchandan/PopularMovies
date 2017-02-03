@@ -88,8 +88,16 @@ public class DetailActivity extends AppCompatActivity {
         try {
             if(new DetailActivityConnectionStatusUtil().execute().get()){
                 Picasso.with(context).setLoggingEnabled(true);
-                Picasso.with(context).load(movie.getMovieBackDropUrl()).into(imageView_detailActivity_backdrop);
-                Picasso.with(context).load(movie.getMoviePosterUrl()).into(imageView_detailActivity_poster);
+                Picasso.with(context)
+                        .load(movie.getMovieBackDropUrl())
+                        .placeholder(R.drawable.placeholder_small_stacked_blue)
+                        .error(R.drawable.placeholder_small_stacked_blue)
+                        .into(imageView_detailActivity_backdrop);
+                Picasso.with(context)
+                        .load(movie.getMoviePosterUrl())
+                        .placeholder(R.drawable.placeholder_small_stacked_blue)
+                        .error(R.drawable.placeholder_small_stacked_blue)
+                        .into(imageView_detailActivity_poster);
                 textView_detailActivity_originalTitle.setText(movie.getMovieOriginalTitle());
                 textView_detailActivity_movie_releaseDate.setText(movie.getMovieReleaseDate());
                 ratingBar_detailActivity_movieRating.setNumStars(10);

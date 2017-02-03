@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -193,13 +194,26 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
     }
 
     /**
+     * Method calculateNoOfColumns dynamically calculate the number of columns and the layout would adapt
+     * to the screen size and orientation.
+     * @param context //Context of the current Activity
+     * @return //Return the optimal no of columns
+     */
+    public static int calculateNoOfColumns(Context context) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int noOfColumns = (int) (dpWidth / 180);
+        return noOfColumns;
+    }
+
+    /**
      * Method loadMovieData instantiated the adapter and connects the adapter to the RecyclerView. This method also determines
      * the kind of LayoutManager the RecyclerView is going to use to display the data.
      * @param movieList
      */
     public void loadMovieData(List<Movie> movieList){
         MovieDataAdapter movieDataAdapter=null;
-        recyclerView_moviedata.setLayoutManager(new GridLayoutManager(this,2));
+        recyclerView_moviedata.setLayoutManager(new GridLayoutManager(this,calculateNoOfColumns(getBaseContext())));
         if(movieList.size() > 0){
            movieDataAdapter = new MovieDataAdapter(movieList,this);
         }
