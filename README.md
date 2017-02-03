@@ -3,7 +3,7 @@
 #####This project focuses on the following necessary attributes:
 - An overflow menu button is included at the top right corner of the AppBar in the main activity window which will let the user to switch between the two main sort orders of the movies i.e. popular movies top rated movies. Upon selecting the appropriate menu item appropriate set of movies will be loaded in the main activity window. By default the sort order will be popular movies i.e. a set of popular movies will be loaded in the Grid when the app is launched first time.
 
-<img src="https://cloud.githubusercontent.com/assets/19269229/22567644/1cd5c7ce-e991-11e6-9ac8-30eda8f860de.png" width="220" height="70">
+<img src="https://cloud.githubusercontent.com/assets/19269229/22593680/137afd68-ea20-11e6-827f-b6b7dc9cb11d.png" width="220" height="70">
 
 - A check will be performed for the network connection before each potential network operation to prevent the app from crashing when there is disruption in the network connectivity. In case there is a network connectivity disruption, there will be an error message which will advise the user to ensure the network connectivity and tap the Refresh action menu button in the main activity, provided in the AppBar, left hand side of the overflow menu option. A similar error message has also been configured in the detail activity which will alert the user to ensure the network connectivity and relaunch if network is gone.
 

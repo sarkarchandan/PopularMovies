@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PopularMovies</string>
-    <string name="top_rated_movies">Top Rated</string>
-    <string name="popular_movies">Popular</string>
+    <string name="top_rated_movies">Highest Rated</string>
+    <string name="popular_movies">Most Popular</string>
     <string name="action_refresh">Refresh</string>
     <string name="action_share">Share</string>
     <string name="action_find_in_web">Find In Web</string>
