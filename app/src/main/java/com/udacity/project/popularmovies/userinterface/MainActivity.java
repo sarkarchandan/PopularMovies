@@ -98,7 +98,6 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
      * displayed in the MainActivity and users are advised to check the network connection and hit the refresh button in the AppBar.
      */
     public void showNetworkError(){
-        textView_error_message.setText("An Error has occurred. Please ensure the network connectivity and refresh the page.");
         textView_error_message.setVisibility(View.VISIBLE);
         progressBar_load.setVisibility(View.INVISIBLE);
         recyclerView_moviedata.setVisibility(View.INVISIBLE);

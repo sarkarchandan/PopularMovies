@@ -157,7 +157,6 @@ public class DetailActivity extends AppCompatActivity {
         progressBar_detailActivity_loading.setVisibility(View.INVISIBLE);
         cardView.setVisibility(View.INVISIBLE);
         textView_detailActivity_error_message.setVisibility(View.VISIBLE);
-        textView_detailActivity_error_message.setText("An Error has occurred. Please ensure the network connectivity and re-launch the app");
         imageView_detailActivity_poster.setVisibility(View.INVISIBLE);
         imageView_detailActivity_backdrop.setVisibility(View.INVISIBLE);
         textView_detailActivity_originalTitle.setVisibility(View.INVISIBLE);

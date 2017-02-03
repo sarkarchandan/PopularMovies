@@ -19,7 +19,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/textView_error_message"
         android:fontFamily="monospace"
-        tools:text="An Error has occurred. Please ensure the network connectivity and refresh the page."
+        android:text="@string/error_main_activity"
         android:visibility="invisible"/>
 
     <android.support.v7.widget.RecyclerView

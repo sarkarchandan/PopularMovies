@@ -5,4 +5,6 @@
     <string name="action_refresh">Refresh</string>
     <string name="action_share">Share</string>
     <string name="action_find_in_web">Find In Web</string>
+    <string name="error_main_activity">An Error has occurred. Please ensure the network connectivity and Refresh the page using the Action Menu button provided above.</string>
+    <string name="error_detail_activity">An Error has occurred. Please ensure the network connectivity and re-launch the app or go back to main page.</string>
 </resources>
