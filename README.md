@@ -17,7 +17,13 @@
 <img src="https://cloud.githubusercontent.com/assets/19269229/22569037/63b2da06-e996-11e6-895c-fedd86a6eb2d.png" width="220" height="70">
 
 - Upon pushing the up button in the detail activity in any case will load the main activity with the default setting i.e. ***with the set of popular movies***.
-- ConstraintLayout is used to achieve a responsive design. I have faced some issues while working with the ConstraintLayout which I have included in the issues and challenges section.
+- ConstraintLayout is used to achieve a responsive design in the DetailActivity. I have faced some issues while working with the ConstraintLayout which I have included in the issues and challenges section.
+
+###Revision
+###### As I am continuing my learning, I have made some improvements in the current state of the app.
+######Initially I was not properly handling the Instance state, using the android:configChanges="keyboardHidden|orientation|screenSize"  attribute in the manifest. Now as I have learned how to deal with the lifecycle in better way, I have incorporated the Loader pattern with AsyncTaskLoader and implemented the onSaveInstanceState() callback method to handle the instance state in a better way. 
+######Now on rotation the app behaves correctly as well as the refresh action menu button on the MainActivity behaves in an expected way. Earlier in case of a network disruption, upon recovery refresh button used to load the popular movies even if last loaded movies before network disruption were top rated ones. Now that behavior is corrected. Now the refresh button refreshes correct movie instances pre and post network disruption.
+
 
 ##### Following are some sample executions:
 <img src="https://cloud.githubusercontent.com/assets/19269229/22569216/f5673096-e996-11e6-9817-dfd5e6b0a514.png" width="150" height="250">

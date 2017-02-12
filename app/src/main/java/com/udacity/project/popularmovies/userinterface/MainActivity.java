@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -34,7 +37,7 @@ import com.udacity.project.popularmovies.model.Movie;
 import com.udacity.project.popularmovies.utilities.DataProcessingUtils;
 import com.udacity.project.popularmovies.utilities.MovieDataUtils;
 
-public class MainActivity extends AppCompatActivity implements MovieDataAdapter.OnMovieCardClickListener{
+public class MainActivity extends AppCompatActivity implements MovieDataAdapter.OnMovieCardClickListener,LoaderManager.LoaderCallbacks<List<Movie>>{
 
     /*Constant to be used for logging*/
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -44,8 +47,17 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
     /*Popular movie specific constant*/
     private static final String TOP_RATED = "top_rated";
 
-    /*constant to be used to put the Parcelable Movie instance to the Intent as extra*/
+    /*Constant to be used to put the Parcelable Movie instance to the Intent as extra*/
     private static final String PARCELABLE_MOVIE = "parcelable_movie";
+
+    /*Constant to be used as the ID of the Loader to bind the Loader to the LoaderManager*/
+    private static final int MOVIE_LOADER_ID = 0;
+
+    /*Constant to be used as the key to put the appropriate movie type to the Bundle*/
+    private static final String MOVIE_TYPE_KEY = "movieType";
+
+    /*Constant static but not final to capture the selected movie type at any point*/
+    private static String SELECTED_MOVIE_TYPE = null;
 
 
     private ProgressBar progressBar_load;
@@ -65,7 +77,14 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
         * network connectivity in background task and then loading the movie data*/
         try {
             if(new MainActivityConnectionStatusUtil().execute().get()){
-                triggerBackgroundTask(POPULAR);
+                getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,null,this);
+                if(savedInstanceState!=null){
+                    if(savedInstanceState.containsKey(MOVIE_TYPE_KEY)){
+                        triggerBackgroundTask(savedInstanceState.getString(MOVIE_TYPE_KEY));
+                    }
+                }else{
+                    triggerBackgroundTask(POPULAR);
+                }
             }else{
                 showNetworkError();
             }
@@ -74,6 +93,17 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Implementation of the onSavedInstanceState to restore the instance state of the MainActivity in case the
+     * the device is rotated.
+     * @param outState
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString(MOVIE_TYPE_KEY,SELECTED_MOVIE_TYPE);
     }
 
     /**
@@ -105,12 +135,21 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
     }
 
     /**
-     * Method triggerBackgroundTask runs the Background task with movie category so that the appropriate movie data
+     * Method triggerBackgroundTask runs the Background task in Loader pattern with movie category so that the appropriate movie data
      * could be fetched from the movie db api.
      * @param movieDataType // sort category of the movie data
      */
     public void triggerBackgroundTask(String movieDataType){
-        new PopularMoviesUtility().execute(movieDataType);
+        Bundle movieTypeBundle = new Bundle();
+        SELECTED_MOVIE_TYPE = movieDataType;
+        movieTypeBundle.putString(MOVIE_TYPE_KEY,movieDataType);
+        LoaderManager movieLoaderManager = getSupportLoaderManager();
+        Loader<List<Movie>> movieDataLoader = movieLoaderManager.getLoader(MOVIE_LOADER_ID);
+        if(movieDataLoader==null){
+            movieLoaderManager.initLoader(MOVIE_LOADER_ID,movieTypeBundle,this);
+        }else{
+            movieLoaderManager.restartLoader(MOVIE_LOADER_ID,movieTypeBundle,this);
+        }
     }
 
     /**
@@ -176,7 +215,11 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
                 * network connectivity in background task and then loading the movie data*/
                 try {
                     if(new MainActivityConnectionStatusUtil().execute().get()){
-                        triggerBackgroundTask(POPULAR);
+                        if(SELECTED_MOVIE_TYPE!=null){
+                            triggerBackgroundTask(SELECTED_MOVIE_TYPE);
+                        }else{
+                            triggerBackgroundTask(POPULAR);
+                        }
                         Toast.makeText(MainActivity.this,"Movies Data Refreshed",Toast.LENGTH_SHORT).show();
                         Log.d(TAG,"Movies Data Refreshed");
                         return true;
@@ -235,34 +278,80 @@ public class MainActivity extends AppCompatActivity implements MovieDataAdapter.
         startActivity(intent);
     }
 
-    /**Inner class for the MainActivity to handle data load from the api in background task*/
-    public class PopularMoviesUtility extends AsyncTask<String,Void,List<Movie>>{
-        @Override
-        protected void onPreExecute() {
-            showProgress();
-        }
-        @Override
-        protected List<Movie> doInBackground(String... strings) {
-            try {
-                String jsonData = MovieDataUtils.fetchMovieDataFromHttpUrl(MovieDataUtils.buildPopularMovieDataRequestURL(strings[0]));
-                movieList = DataProcessingUtils.processRawMovieData(jsonData);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (JSONException e) {
-                e.printStackTrace();
+    /**
+     * Method onCreateLoader is part of the Loader pattern
+     * @param id
+     * @param args
+     * @return
+     */
+    @Override
+    public Loader<List<Movie>> onCreateLoader(int id, final Bundle args) {
+
+        return new AsyncTaskLoader<List<Movie>>(this) {
+
+            List<Movie> movieDataListCache = null;
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if(args == null){
+                    return;
+                }
+                if(movieDataListCache != null){
+                    deliverResult(movieDataListCache);
+                }else{
+                    showProgress();
+                    forceLoad();
+                }
             }
-            return movieList;
-        }
-        @Override
-        protected void onPostExecute(List<Movie> movieList) {
-            progressBar_load.setVisibility(View.INVISIBLE);
-            for(Movie movie:movieList) {
-                Log.d(TAG, movie.getMovieOriginalTitle());
+            @Override
+            public List<Movie> loadInBackground() {
+                String movieType = null;
+                if(args!=null){
+                    if(args.containsKey(MOVIE_TYPE_KEY)){
+                        movieType = args.getString(MOVIE_TYPE_KEY);
+                    }
+                }
+                try {
+                    String jsonData = MovieDataUtils.fetchMovieDataFromHttpUrl(MovieDataUtils.buildPopularMovieDataRequestURL(movieType));
+                    movieList = DataProcessingUtils.processRawMovieData(jsonData);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                return movieList;
             }
-                loadMovieData(movieList);
-                showData();
-        }
+            @Override
+            public void deliverResult(List<Movie> movieData) {
+                if(movieData != null){
+                    movieDataListCache = movieData;
+                }
+                super.deliverResult(movieData);
+            }
+        };
     }
+
+    /**
+     * Method onLoadFinished is part of the Loader pattern
+     * @param loader
+     * @param movieListdata
+     */
+    @Override
+    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> movieListdata) {
+        for(Movie movie:movieListdata) {
+            Log.d(TAG, movie.getMovieOriginalTitle());
+        }
+        loadMovieData(movieListdata);
+        showData();
+    }
+
+    /**
+     * Method onLoaderRest is part of the Loader pattern and useful when we wish to reset the Loader which is not the case in our
+     * implementation. Hence the onLoaderReset will have an empty implementation
+     * @param loader
+     */
+    @Override
+    public void onLoaderReset(Loader<List<Movie>> loader) {}
 
     /**Inner class for the MainActivity to check the network connection in the device in background task*/
     public class MainActivityConnectionStatusUtil extends AsyncTask<Void,Void,Boolean>{
