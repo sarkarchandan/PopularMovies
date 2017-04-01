@@ -1,10 +1,9 @@
 <resources>
     <string name="app_name">PopularMovies</string>
-    <string name="top_rated_movies">Highest Rated</string>
-    <string name="popular_movies">Most Popular</string>
-    <string name="action_refresh">Refresh</string>
+    <string name="favorite_activity_name">Favorites</string>
+    <string name="top_rated_movies">Top Rated</string>
+    <string name="popular_movies">Popular</string>
+    <string name="favorite_movies">Favorites</string>
     <string name="action_share">Share</string>
     <string name="action_find_in_web">Find In Web</string>
-    <string name="error_main_activity">An Error has occurred. Please ensure the network connectivity and Refresh the page using the Action Menu button provided above.</string>
-    <string name="error_detail_activity">An Error has occurred. Please ensure the network connectivity and re-launch the app or go back to main page.</string>
 </resources>

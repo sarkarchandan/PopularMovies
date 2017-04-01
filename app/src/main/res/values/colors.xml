@@ -8,4 +8,6 @@
     <color name="color_movie">#212121</color>
     <color name="movieInfo">#FAFAFA</color>
     <color name="titleColor">#FAFAFA</color>
+    <color name="selectedTabTextColor">#F6AA1C</color>
+    <color name="selectedTabIndicatorColor">#011936</color>
 </resources>

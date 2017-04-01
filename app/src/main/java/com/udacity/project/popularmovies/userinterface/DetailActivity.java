@@ -34,7 +34,6 @@ public class DetailActivity extends AppCompatActivity {
     private static final String PARCELABLE_MOVIE = "parcelable_movie";
 
     private Toolbar toolBar_activity_detail;
-    private TextView textView_detailActivity_error_message;
     private ImageView imageView_detailActivity_backdrop;
     private ImageView imageView_detailActivity_poster;
     private TextView textView_detailActivity_originalTitle;
@@ -53,7 +52,6 @@ public class DetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_detail);
 
         toolBar_activity_detail = (Toolbar) findViewById(R.id.toolBar_activity_detail);
-        textView_detailActivity_error_message = (TextView)findViewById(R.id.textView_detailActivity_error_message);
         setSupportActionBar(toolBar_activity_detail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -85,8 +83,6 @@ public class DetailActivity extends AppCompatActivity {
      */
     public void loadMovieData(Movie movie){
         context = DetailActivity.this;
-        try {
-            if(new DetailActivityConnectionStatusUtil().execute().get()){
                 Picasso.with(context).setLoggingEnabled(true);
                 Picasso.with(context)
                         .load(movie.getMovieBackDropUrl())
@@ -106,14 +102,6 @@ public class DetailActivity extends AppCompatActivity {
                 textView_detailActivity_plot_synopsis.setText("Synopsis: ");
                 textView_detailActivity_plot_synopsis.append("\n"+movie.getMoviePlotSynopsis());
                 showData();
-            }else{
-                showNetworkError();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -133,7 +121,6 @@ public class DetailActivity extends AppCompatActivity {
      */
     public void showProgress(){
         progressBar_detailActivity_loading.setVisibility(View.VISIBLE);
-        textView_detailActivity_error_message.setVisibility(View.INVISIBLE);
         imageView_detailActivity_poster.setVisibility(View.INVISIBLE);
         imageView_detailActivity_backdrop.setVisibility(View.INVISIBLE);
         textView_detailActivity_originalTitle.setVisibility(View.INVISIBLE);
@@ -148,7 +135,6 @@ public class DetailActivity extends AppCompatActivity {
      */
     public void showData(){
         progressBar_detailActivity_loading.setVisibility(View.INVISIBLE);
-        textView_detailActivity_error_message.setVisibility(View.INVISIBLE);
         cardView.setVisibility(View.VISIBLE);
         imageView_detailActivity_poster.setVisibility(View.VISIBLE);
         imageView_detailActivity_backdrop.setVisibility(View.VISIBLE);
@@ -156,21 +142,6 @@ public class DetailActivity extends AppCompatActivity {
         ratingBar_detailActivity_movieRating.setVisibility(View.VISIBLE);
         textView_detailActivity_movie_releaseDate.setVisibility(View.VISIBLE);
         textView_detailActivity_plot_synopsis.setVisibility(View.VISIBLE);
-    }
-
-    /**
-     * Method showNetworkError is triggered in case we have a disruption in network connectivity.
-     */
-    public void showNetworkError(){
-        progressBar_detailActivity_loading.setVisibility(View.INVISIBLE);
-        cardView.setVisibility(View.INVISIBLE);
-        textView_detailActivity_error_message.setVisibility(View.VISIBLE);
-        imageView_detailActivity_poster.setVisibility(View.INVISIBLE);
-        imageView_detailActivity_backdrop.setVisibility(View.INVISIBLE);
-        textView_detailActivity_originalTitle.setVisibility(View.INVISIBLE);
-        ratingBar_detailActivity_movieRating.setVisibility(View.INVISIBLE);
-        textView_detailActivity_movie_releaseDate.setVisibility(View.INVISIBLE);
-        textView_detailActivity_plot_synopsis.setVisibility(View.INVISIBLE);
     }
 
     /**
@@ -196,6 +167,9 @@ public class DetailActivity extends AppCompatActivity {
         int selectedItemId = item.getItemId();
         context = DetailActivity.this;
         switch (selectedItemId){
+            case (android.R.id.home):
+                onBackPressed();
+                return true;
             case (R.id.detailActivityMenuItem_share):
                 shareMovieInformation();
                 Log.i(TAG,movie.getMovieOriginalTitle()+" shared");

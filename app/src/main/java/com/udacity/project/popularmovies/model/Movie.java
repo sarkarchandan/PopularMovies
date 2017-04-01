@@ -3,14 +3,15 @@ package com.udacity.project.popularmovies.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.List;
+
 /**
- * Class Movie is the template for the movie object which will encapsulate all required and useful attribute of the type Movie in our
- * app.
+ * Class Movie encapsulates all required attribute of the type Movie.
  * Created by chandan on 25/01/2017.
  */
 public class Movie implements Parcelable {
 
-    private int movieId;
+    private int movieTMDBId;
     private String movieOriginalTitle;
     private String moviePosterUrl;
     private String movieBackDropUrl;
@@ -18,21 +19,11 @@ public class Movie implements Parcelable {
     private String moviePlotSynopsis;
     private float movieRating;
     private String movieReleaseDate;
+    private List<MovieTrailer> movieTrailers;
+    private List<MovieReview> movieReviews;
 
-
-    /**
-     * Constructor for creating Movie instances
-     * @param movieId
-     * @param movieOriginalTitle
-     * @param moviePosterUrl
-     * @param movieBackDropUrl
-     * @param movieWebUrl
-     * @param moviePlotSynopsis
-     * @param movieRating
-     * @param movieReleaseDate
-     */
-    public Movie(int movieId, String movieOriginalTitle, String moviePosterUrl, String movieBackDropUrl, String movieWebUrl,String moviePlotSynopsis, float movieRating, String movieReleaseDate) {
-        this.movieId = movieId;
+    public Movie(int movieTMDBId, String movieOriginalTitle, String moviePosterUrl, String movieBackDropUrl, String movieWebUrl, String moviePlotSynopsis, float movieRating, String movieReleaseDate, List<MovieTrailer> movieTrailers, List<MovieReview> movieReviews) {
+        this.movieTMDBId = movieTMDBId;
         this.movieOriginalTitle = movieOriginalTitle;
         this.moviePosterUrl = moviePosterUrl;
         this.movieBackDropUrl = movieBackDropUrl;
@@ -40,16 +31,12 @@ public class Movie implements Parcelable {
         this.moviePlotSynopsis = moviePlotSynopsis;
         this.movieRating = movieRating;
         this.movieReleaseDate = movieReleaseDate;
+        this.movieTrailers = movieTrailers;
+        this.movieReviews = movieReviews;
     }
 
-    /**
-     * This private constructor is to be used by the createFromParcel() method of the Parcelable.Creator interface
-     * to return a Movie instance of parcel. And behind the scene it decodes the Parcel object and restores the values
-     * of the attributes of our custom class.
-     * @param parcel
-     */
     private Movie(Parcel parcel) {
-        movieId = parcel.readInt();
+        movieTMDBId = parcel.readInt();
         movieOriginalTitle = parcel.readString();
         moviePosterUrl = parcel.readString();
         movieBackDropUrl = parcel.readString();
@@ -57,17 +44,16 @@ public class Movie implements Parcelable {
         moviePlotSynopsis = parcel.readString();
         movieRating = parcel.readFloat();
         movieReleaseDate = parcel.readString();
+        movieReviews = parcel.readArrayList(MovieReview.class.getClassLoader());
+        movieTrailers = parcel.readArrayList(MovieTrailer.class.getClassLoader());
     }
 
-
-    /**Getter and Setter methods for the Movie class instance variables*/
-
-    public int getMovieId() {
-        return movieId;
+    public int getMovieTMDBId() {
+        return movieTMDBId;
     }
 
-    public void setMovieId(int movieId) {
-        this.movieId = movieId;
+    public void setMovieTMDBId(int movieTMDBId) {
+        this.movieTMDBId = movieTMDBId;
     }
 
     public String getMovieOriginalTitle() {
@@ -126,19 +112,30 @@ public class Movie implements Parcelable {
         this.movieReleaseDate = movieReleaseDate;
     }
 
+    public List<MovieTrailer> getMovieTrailers() {
+        return movieTrailers;
+    }
+
+    public void setMovieTrailers(List<MovieTrailer> movieTrailers) {
+        this.movieTrailers = movieTrailers;
+    }
+
+    public List<MovieReview> getMovieReviews() {
+        return movieReviews;
+    }
+
+    public void setMovieReviews(List<MovieReview> movieReviews) {
+        this.movieReviews = movieReviews;
+    }
+
     @Override
     public int describeContents() {
         return 0;
     }
 
-    /**
-     * We are taking the data from the instance variables and writing to the Parcel object.
-     * @param parcel //Parcel object
-     * @param i //correspond to the position
-     */
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeInt(movieId);
+        parcel.writeInt(movieTMDBId);
         parcel.writeString(movieOriginalTitle);
         parcel.writeString(moviePosterUrl);
         parcel.writeString(movieBackDropUrl);
@@ -146,11 +143,10 @@ public class Movie implements Parcelable {
         parcel.writeString(moviePlotSynopsis);
         parcel.writeFloat(movieRating);
         parcel.writeString(movieReleaseDate);
+        parcel.writeList(movieReviews);
+        parcel.writeList(movieTrailers);
     }
 
-    /**
-     * Parcelable.Creator method receives the Parcel and decodes the contents that are written to Parcel.
-     */
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>(){
 
         @Override

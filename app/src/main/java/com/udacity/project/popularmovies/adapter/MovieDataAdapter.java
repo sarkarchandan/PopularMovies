@@ -1,6 +1,7 @@
 package com.udacity.project.popularmovies.adapter;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,31 +11,33 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 import com.udacity.project.popularmovies.R;
 import com.udacity.project.popularmovies.model.Movie;
+import com.udacity.project.popularmovies.userinterface.MainActivity;
+
 import java.util.List;
 
 /**
- * Adapter class for the RecyclerView
+ * Adapter class for the RecyclerView in the MainActivity.
  * Created by chandan on 23/01/2017.
  */
 
 public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.MovieDataViewHolder>{
 
-    private List<Movie> movieList;
+    private Cursor movieCursor;
     private Context context;
     private OnMovieCardClickListener onMovieCardClickListener;
 
     /**
      * Constructor for creating instances of MovieDataAdapter
-     * @param movieList
+     * @param movieCursor
      */
-    public MovieDataAdapter(List<Movie> movieList,Context context) {
-        this.movieList = movieList;
+    public MovieDataAdapter(Cursor movieCursor,Context context) {
+        this.movieCursor = movieCursor;
         this.context = context;
     }
 
     /**Defining Callback interface to implement the click event*/
     public interface OnMovieCardClickListener{
-        public void onMovieCardClick(int position);
+        void onMovieCardClick(long position);
     }
 
     /**Setter method for OnMovieCardClickListener*/
@@ -67,10 +70,10 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
      */
     @Override
     public void onBindViewHolder(MovieDataViewHolder holder, int position) {
-        Movie movieItem = movieList.get(position);
-        Picasso.with(context).setLoggingEnabled(true);
+        movieCursor.moveToPosition(position);
+        String moviePosterUrl = movieCursor.getString(MainActivity.INDEX_MOVIE_POSTER_URL);
         Picasso.with(context)
-                .load(movieItem.getMoviePosterUrl())
+                .load(moviePosterUrl)
                 .placeholder(R.drawable.placeholder_small_stacked_blue)
                 .error(R.drawable.placeholder_small_stacked_blue)
                 .into(holder.imageView_movie_card_moviePoster);
@@ -78,7 +81,7 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
 
     @Override
     public int getItemCount() {
-        return movieList.size();
+        return movieCursor.getCount();
     }
 
 
