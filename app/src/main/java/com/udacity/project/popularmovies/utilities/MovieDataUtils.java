@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.udacity.project.popularmovies.BuildConfig;
@@ -14,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Utility class that defines parameters and methods for performing the network operations. This class also defines the method
@@ -153,7 +155,7 @@ public class MovieDataUtils {
      * @param context //Context of the Activity class that checks the Connection status.
      * @return boolean // indicating the connectivity status of the device.
      */
-    public static boolean checkConnectivityStatus(Context context){
+    private static boolean checkConnectivityStatus(Context context){
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
         if(networkInfo!=null && networkInfo.isConnected()){
@@ -172,5 +174,36 @@ public class MovieDataUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Checks the network Status in Background threads and returns boolean. This is a convenient method to be used all over
+     * the app.
+     * @param context
+     * @return
+     */
+    public static boolean checkConnectionStatusInBackground(final Context context){
+
+        boolean deviceNetworkStatus = false;
+
+        //Defining an background task to check the network status.
+        AsyncTask connectivityCheckAsyncTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                boolean networkStatus = checkConnectivityStatus(context);
+                return new Boolean(networkStatus);
+            }
+        };
+
+        //Checking network status.
+        try {
+            deviceNetworkStatus = (boolean) connectivityCheckAsyncTask.execute().get();
+            Log.d(TAG, "Current Network Status: "+deviceNetworkStatus);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return deviceNetworkStatus;
     }
 }

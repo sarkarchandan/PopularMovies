@@ -14,7 +14,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     //Database name
     private static final String MOVIE_DATABASE_NAME = "movies.db";
     //Database version
-    private static final int MOVIE_DATABASE_VERSION = 4;
+    private static final int MOVIE_DATABASE_VERSION = 5;
 
     public MovieDBHelper(Context context){
         super(context,MOVIE_DATABASE_NAME,null,MOVIE_DATABASE_VERSION);
@@ -39,7 +39,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieContract.Movies.MOVIE_RELEASE_DATE + " TEXT NOT NULL, " +
                 MovieContract.Movies.MOVIE_RATING + " REAL NOT NULL, " +
                 MovieContract.Movies.MOVIE_PLOT_SYNOPSIS + " TEXT NOT NULL, " +
-                MovieContract.Movies.IS_FAVORITE_MOVIE + "INTEGER DEFAULT 0 " +
+                MovieContract.Movies.IS_FAVORITE_MOVIE + " INTEGER DEFAULT 0 " +
                 ");";
 
         //Declaring trailers table schema

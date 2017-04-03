@@ -14,6 +14,7 @@ import com.udacity.project.popularmovies.model.MovieTrailer;
 import com.udacity.project.popularmovies.persistence.MovieContract;
 import com.udacity.project.popularmovies.utilities.DataProcessingUtils;
 import com.udacity.project.popularmovies.utilities.MovieDataUtils;
+import com.udacity.project.popularmovies.utilities.NotificationUtils;
 
 import org.json.JSONException;
 
@@ -31,6 +32,7 @@ public class DataPopulationTasks {
     //Constant for basic logging.
     private static final String TAG = DataPopulationTasks.class.getSimpleName();
 
+    //Defining the ACTION constant for the task that we want our Service to perform in the background.
     public static final String ACTION_POPULATE_MOVIE_DATA = "populate-movie-data";
 
     /*Popular movie specific constant*/
@@ -43,10 +45,12 @@ public class DataPopulationTasks {
      * @param context // Application context
      * @param movieCategory //Category of the movie, typically popular and top_rated
      */
-    public static void populateMovieData(Context context,String movieCategory){
+    public static int populateMovieData(Context context,String movieCategory){
 
         /*String constant array for checking whether a Movie is already in the favorites*/
         String[] EXISTING_MOVIE_CHECK_PROJECTION = new String[]{MovieContract.Movies.MOVIE_ORIGINAL_TITLE};
+
+        int noOfMoviesUpdated = 0;
 
         //Getting the ContentResolver instance
         ContentResolver contentResolver = context.getContentResolver();
@@ -111,6 +115,7 @@ public class DataPopulationTasks {
                         reviewsContentValues.put(MovieContract.Reviews.REVIEW_CONTENT,movieReview.getMovieReviewContent());
                         //Persisting data to the reviews directory
                         contentResolver.insert(reviewsContentUri,reviewsContentValues);
+                        noOfMoviesUpdated++;
                     }
                 }
             }
@@ -119,6 +124,7 @@ public class DataPopulationTasks {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return noOfMoviesUpdated;
     }
 
     /**
@@ -127,37 +133,22 @@ public class DataPopulationTasks {
      * @param context // Passed in application context
      * @param action // Passed in action
      */
-    public static void executeTask(final Context context, String action){
-        boolean deviceNetworkStatus = false;
+    public static int executeTask(final Context context, String action){
 
-        //Defining an background task to check the network status.
-        AsyncTask connectivityCheckAsyncTask = new AsyncTask() {
-            @Override
-            protected Object doInBackground(Object[] objects) {
-                boolean networkStatus = MovieDataUtils.checkConnectivityStatus(context);
-                return new Boolean(networkStatus);
-            }
-        };
-
-        //Checking network status.
-        try {
-            deviceNetworkStatus = (boolean) connectivityCheckAsyncTask.execute().get();
-            Log.d(TAG, "Current Network Status: "+deviceNetworkStatus);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
+        int noOfPopularMoviesUpdated = 0;
+        int noOfTopRatedMoviesUpdated = 0;
 
         //Service will only be executed in case there is a connectivity. Otherwise it might result into stale data.
         if(action.equals(ACTION_POPULATE_MOVIE_DATA)){
-            if(deviceNetworkStatus){
-                populateMovieData(context,POPULAR);
-                populateMovieData(context,TOP_RATED);
+            if(MovieDataUtils.checkConnectionStatusInBackground(context)){
+                noOfPopularMoviesUpdated = populateMovieData(context,POPULAR);
+                noOfTopRatedMoviesUpdated = populateMovieData(context,TOP_RATED);
                 Log.d(TAG,"DataPopulationService Executed");
             }else {
                 Log.d(TAG, "Device is not connected to Internet. Might result to stale data.");
             }
         }
+        Log.d(TAG,"No of new Movie data updated: "+(noOfPopularMoviesUpdated+noOfTopRatedMoviesUpdated));
+        return (noOfPopularMoviesUpdated+noOfTopRatedMoviesUpdated);
     }
 }

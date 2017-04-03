@@ -6,6 +6,10 @@
         android:id="@+id/detailActivityMenuItem_share"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_share_white_24dp"/>
+    <item android:title="@string/action_favorite"
+        android:id="@+id/detailActivityMenuItem_Favorite"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_favorite_white_24dp"/>
     <item android:title="@string/action_find_in_web"
         android:id="@+id/detailActivityMenuItem_findInWeb"
         android:orderInCategory="1" />

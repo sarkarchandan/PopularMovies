@@ -25,6 +25,8 @@ import com.udacity.project.popularmovies.adapter.MovieDataAdapter;
 import com.udacity.project.popularmovies.persistence.MovieContract;
 import com.udacity.project.popularmovies.service.DataPopulationIntentService;
 import com.udacity.project.popularmovies.service.DataPopulationTasks;
+import com.udacity.project.popularmovies.service.MovieDataUpdateServiceUtils;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
@@ -46,12 +48,15 @@ public class MainActivity extends AppCompatActivity
     private static final int DEFAULT_SELECTED_TAB = 0;
 
     //String array constant for the projection of data that we need from the database
-    public static final String[] MOVIE_GRID_PROJECTION = new String[]{
+    private static final String[] MOVIE_GRID_PROJECTION = new String[]{
+            MovieContract.Movies._ID,
             MovieContract.Movies.MOVIE_POSTER_URL
     };
 
     //Integer constants that are to be used for retrieving data from the Cursor.
-    public static final int INDEX_MOVIE_POSTER_URL = 0;
+    public static final int INDEX_MOVIE_DB_ID = 0;
+    public static final int INDEX_MOVIE_POSTER_URL = 1;
+
 
     //String constants to be used as the Selection parameter for movie data
     public static final String MOVIE_SELECTION = MovieContract.Movies.MOVIE_TMDB_TYPE+" =?";
@@ -62,7 +67,7 @@ public class MainActivity extends AppCompatActivity
     //String constant to be used as the matching condition value for Top Rated movies.
     public static final String[] TOP_RATED_MOVIE_SELECTION_ARGS = new String[]{DataPopulationTasks.TOP_RATED};
 
-    //Binding the Views in the layout.
+    //Binding the Views of the MainActivity Layout.
     @BindView(R.id.tabLayout_main_Activity_movieType_switcher)
     public TabLayout tabLayout_main_Activity_movieType_switcher;
     @BindView(R.id.loading_activity_main)
@@ -75,10 +80,7 @@ public class MainActivity extends AppCompatActivity
     //Bundle reference for selecting the appropriate movie type depending on the circumstances.
     private Bundle movieDataBundle;
 
-    /**
-     * Initializes the core app behavior and interaction.
-     * @param savedInstanceState
-     */
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -86,9 +88,12 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
 
         //Starting the Service in background to update the database in case there is any new movie data available.
-        Intent testServiceIntent = new Intent(this, DataPopulationIntentService.class);
-        testServiceIntent.setAction(DataPopulationTasks.ACTION_POPULATE_MOVIE_DATA);
-        startService(testServiceIntent);
+        Intent dataPopulationServiceIntent = new Intent(this, DataPopulationIntentService.class);
+        dataPopulationServiceIntent.setAction(DataPopulationTasks.ACTION_POPULATE_MOVIE_DATA);
+        startService(dataPopulationServiceIntent);
+
+        //Scheduling the periodic Movie data update procedure using the FirebaseJobDispatcher
+        MovieDataUpdateServiceUtils.scheduleMovieDataUpdate(this);
 
         //Setting Elevation for the default Support Action Bar. Otherwise there will be elevation mismatch.
         getSupportActionBar().setElevation(0f);

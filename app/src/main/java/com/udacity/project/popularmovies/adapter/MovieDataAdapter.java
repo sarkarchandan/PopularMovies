@@ -12,6 +12,7 @@ import com.squareup.picasso.Picasso;
 import com.udacity.project.popularmovies.R;
 import com.udacity.project.popularmovies.model.Movie;
 import com.udacity.project.popularmovies.userinterface.MainActivity;
+import com.udacity.project.popularmovies.utilities.MovieDataUtils;
 
 import java.util.List;
 
@@ -72,6 +73,7 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
     public void onBindViewHolder(MovieDataViewHolder holder, int position) {
         movieCursor.moveToPosition(position);
         String moviePosterUrl = movieCursor.getString(MainActivity.INDEX_MOVIE_POSTER_URL);
+
         Picasso.with(context)
                 .load(moviePosterUrl)
                 .placeholder(R.drawable.placeholder_small_stacked_blue)
@@ -79,6 +81,10 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
                 .into(holder.imageView_movie_card_moviePoster);
     }
 
+    /**
+     * Returns the displayable ItemCount of the data source
+     * @return // Integer
+     */
     @Override
     public int getItemCount() {
         return movieCursor.getCount();
@@ -100,8 +106,8 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
         }
         @Override
         public void onClick(View view) {
-            int adapterPosition = getAdapterPosition();
-            onMovieCardClickListener.onMovieCardClick(adapterPosition);
+            movieCursor.moveToPosition(getAdapterPosition());
+            onMovieCardClickListener.onMovieCardClick(movieCursor.getLong(MainActivity.INDEX_MOVIE_DB_ID));
         }
     }
 }

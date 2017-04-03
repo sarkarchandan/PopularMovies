@@ -1,9 +1,23 @@
 <resources>
+    <!--String resources for the Application and Activity names-->
     <string name="app_name">PopularMovies</string>
     <string name="favorite_activity_name">Favorites</string>
+
+    <!--String Resources for the application specific parameters-->
     <string name="top_rated_movies">Top Rated</string>
     <string name="popular_movies">Popular</string>
+    <string name="movie_synopsis">Synopsis: </string>
+    <string name="already_in_favorite">Already In Favorite</string>
+    <string name="marked_as_favorite">Added To Favorites</string>
+    <string name="no_connectivity">Data Network Not Available</string>
+
+    <!--String resources for the menu items-->
     <string name="favorite_movies">Favorites</string>
     <string name="action_share">Share</string>
     <string name="action_find_in_web">Find In Web</string>
+    <string name="action_favorite">Favorite</string>
+
+    <!--String resources for the Notification-->
+    <string name="notification_title">New Movie Data Available</string>
+    <string name="notification_body">We have exciting new Movie data available for you. How about checking out now !!!</string>
 </resources>

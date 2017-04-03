@@ -1,10 +1,17 @@
 package com.udacity.project.popularmovies.userinterface;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -18,108 +25,141 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import com.udacity.project.popularmovies.R;
 
 import com.squareup.picasso.Picasso;
 import com.udacity.project.popularmovies.model.Movie;
+import com.udacity.project.popularmovies.persistence.MovieContract;
 import com.udacity.project.popularmovies.utilities.MovieDataUtils;
 
 import java.util.concurrent.ExecutionException;
 
-public class DetailActivity extends AppCompatActivity {
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
-    /*Constant to be used for logging*/
-    private final String TAG = DetailActivity.class.getSimpleName();
-    /*Constant to be used for getting the Parcelable object from the Intent*/
-    private static final String PARCELABLE_MOVIE = "parcelable_movie";
+public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private Toolbar toolBar_activity_detail;
-    private ImageView imageView_detailActivity_backdrop;
-    private ImageView imageView_detailActivity_poster;
-    private TextView textView_detailActivity_originalTitle;
-    private RatingBar ratingBar_detailActivity_movieRating;
-    private TextView textView_detailActivity_movie_releaseDate;
-    private TextView textView_detailActivity_plot_synopsis;
-    private ProgressBar progressBar_detailActivity_loading;
-    private CardView cardView;
+    //Constant to be used for logging
+    private static final String TAG = DetailActivity.class.getSimpleName();
+
+    //Binding the Views of the DetailActivity Layout.
+    @BindView(R.id.toolBar_activity_detail)
+    public Toolbar toolBar_activity_detail;
+    @BindView(R.id.imageView_detailActivity_backdrop)
+    public ImageView imageView_detailActivity_backdrop;
+    @BindView(R.id.imageView_detailActivity_poster)
+    public ImageView imageView_detailActivity_poster;
+    @BindView(R.id.textView_detailActivity_originalTitle)
+    public TextView textView_detailActivity_originalTitle;
+    @BindView(R.id.ratingBar_detailActivity_movieRating)
+    public RatingBar ratingBar_detailActivity_movieRating;
+    @BindView(R.id.textView_detailActivity_movie_releaseDate)
+    public TextView textView_detailActivity_movie_releaseDate;
+    @BindView(R.id.textView_detailActivity_plot_synopsis)
+    public TextView textView_detailActivity_plot_synopsis;
+    @BindView(R.id.progressBar_detailActivity_loading)
+    public ProgressBar progressBar_detailActivity_loading;
+    @BindView(R.id.cardView)
+    public CardView cardView;
+
+    //Identifier for the CursorLoader
+    private static final int DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID = 3018;
+
+    //Defining the projection for fetching selected Movie data.
+    private static final String[] MOVIE_DISPLAY_DATA_PROJECTION = new String[]{
+            MovieContract.Movies.MOVIE_ORIGINAL_TITLE,
+            MovieContract.Movies.MOVIE_BACKDROP_URL,
+            MovieContract.Movies.MOVIE_POSTER_URL,
+            MovieContract.Movies.MOVIE_PLOT_SYNOPSIS,
+            MovieContract.Movies.MOVIE_RATING,
+            MovieContract.Movies.MOVIE_RELEASE_DATE
+    };
+
+    //Defining the Cursor Index based on projection.
+    private static final int INDEX_MOVIE_ORIGINAL_TITLE = 0;
+    private static final int INDEX_MOVIE_BACKDROP_URL = 1;
+    private static final int INDEX_MOVIE_POSTER_URL = 2;
+    private static final int INDEX_MOVIE_PLOT_SYNOPSIS = 3;
+    private static final int INDEX_MOVIE_RATING = 4;
+    private static final int INDEX_MOVIE_RELEASE_DATE = 5;
+
     private Context context;
-    private Intent movieIntent;
-    private Movie movie;
+    private Intent selectedMovieIntent;
+    private static Uri selectedMovieDataUri;
+    private Toast popupMessage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        ButterKnife.bind(this);
 
-        toolBar_activity_detail = (Toolbar) findViewById(R.id.toolBar_activity_detail);
         setSupportActionBar(toolBar_activity_detail);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
-
-        //setStatusBarTranslucent(true);
-
-
-        progressBar_detailActivity_loading = (ProgressBar)findViewById(R.id.progressBar_detailActivity_loading);
-        imageView_detailActivity_backdrop = (ImageView) findViewById(R.id.imageView_detailActivity_backdrop);
-        imageView_detailActivity_poster = (ImageView) findViewById(R.id.imageView_detailActivity_poster);
-        textView_detailActivity_originalTitle = (TextView) findViewById(R.id.textView_detailActivity_originalTitle);
-        ratingBar_detailActivity_movieRating = (RatingBar) findViewById(R.id.ratingBar_detailActivity_movieRating);
-        textView_detailActivity_movie_releaseDate = (TextView) findViewById(R.id.textView_detailActivity_movie_releaseDate);
-        textView_detailActivity_plot_synopsis = (TextView) findViewById(R.id.textView_detailActivity_plot_synopsis);
-        cardView = (CardView) findViewById(R.id.cardView);
         showProgress();
 
-        movieIntent = getIntent();
-        if (movieIntent != null && movieIntent.hasExtra(PARCELABLE_MOVIE)) {
-            movie = movieIntent.getExtras().getParcelable(PARCELABLE_MOVIE);
-            Log.d(TAG, movie.getMovieOriginalTitle());
-            loadMovieData(movie);
+        //Handling the Intent that has been passed on from the previous Activity to display the specific Movie data
+        selectedMovieIntent = getIntent();
+        if (selectedMovieIntent != null) {
+            selectedMovieDataUri = selectedMovieIntent.getData();
+            getSupportLoaderManager().initLoader(DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID,null,this);
         }
     }
 
     /**
      * This method displays the data about a Movie in the ui and
-     * @param movie
+     * @param selectedMovieDataCursor //Cursor with the Movie data
      */
-    public void loadMovieData(Movie movie){
-        context = DetailActivity.this;
-                Picasso.with(context).setLoggingEnabled(true);
-                Picasso.with(context)
-                        .load(movie.getMovieBackDropUrl())
-                        .placeholder(R.drawable.placeholder_small_stacked_blue)
-                        .error(R.drawable.placeholder_small_stacked_blue)
-                        .into(imageView_detailActivity_backdrop);
-                Picasso.with(context)
-                        .load(movie.getMoviePosterUrl())
-                        .placeholder(R.drawable.placeholder_small_stacked_blue)
-                        .error(R.drawable.placeholder_small_stacked_blue)
-                        .into(imageView_detailActivity_poster);
-                textView_detailActivity_originalTitle.setText(movie.getMovieOriginalTitle());
-                textView_detailActivity_movie_releaseDate.setText(movie.getMovieReleaseDate());
-                ratingBar_detailActivity_movieRating.setNumStars(10);
-                ratingBar_detailActivity_movieRating.setStepSize(1);
-                ratingBar_detailActivity_movieRating.setRating(movie.getMovieRating());
-                textView_detailActivity_plot_synopsis.setText("Synopsis: ");
-                textView_detailActivity_plot_synopsis.append("\n"+movie.getMoviePlotSynopsis());
-                showData();
-    }
+    private void displayMovieDetails(Cursor selectedMovieDataCursor){
 
-    /**
-     * The method setStatusBarTranslucent makes the top status bar of the device window translucent when needed.
-     * @param makeTranslucent // boolean flag to set the status bar translucent.
-     */
-    public void setStatusBarTranslucent(boolean makeTranslucent){
-        if(makeTranslucent){
-            getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        }else{
-            getWindow().clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+        if(selectedMovieDataCursor.getCount() > 0){
+            selectedMovieDataCursor.moveToFirst();
+            String selectedMovieOriginalTitle = selectedMovieDataCursor.getString(INDEX_MOVIE_ORIGINAL_TITLE);
+            String selectedMovieBackdropURL = selectedMovieDataCursor.getString(INDEX_MOVIE_BACKDROP_URL);
+            String selectedMoviePosterURL = selectedMovieDataCursor.getString(INDEX_MOVIE_POSTER_URL);
+            String selectedMoviePlotSynopsis = selectedMovieDataCursor.getString(INDEX_MOVIE_PLOT_SYNOPSIS);
+            float selectedMovieRating = selectedMovieDataCursor.getFloat(INDEX_MOVIE_RATING);
+            String selectedMovieReleaseDate = selectedMovieDataCursor.getString(INDEX_MOVIE_RELEASE_DATE);
+
+            Picasso.with(context).setLoggingEnabled(true);
+            Picasso.with(context)
+                    .load(selectedMovieBackdropURL)
+                    .placeholder(R.drawable.placeholder_small_stacked_blue)
+                    .error(R.drawable.placeholder_small_stacked_blue)
+                    .into(imageView_detailActivity_backdrop);
+
+            Picasso.with(context)
+                    .load(selectedMoviePosterURL)
+                    .placeholder(R.drawable.placeholder_small_stacked_blue)
+                    .error(R.drawable.placeholder_small_stacked_blue)
+                    .into(imageView_detailActivity_poster);
+            context = DetailActivity.this;
+
+            textView_detailActivity_originalTitle.setText(selectedMovieOriginalTitle);
+            textView_detailActivity_movie_releaseDate.setText(selectedMovieReleaseDate);
+
+            ratingBar_detailActivity_movieRating.setNumStars(10);
+            ratingBar_detailActivity_movieRating.setStepSize(1);
+            ratingBar_detailActivity_movieRating.setRating(selectedMovieRating);
+
+            textView_detailActivity_plot_synopsis.setText(getString(R.string.movie_synopsis));
+            textView_detailActivity_plot_synopsis.append("\n"+selectedMoviePlotSynopsis);
+
+            if(!MovieDataUtils.checkConnectionStatusInBackground(context)){
+                Toast.makeText(context,getString(R.string.no_connectivity),Toast.LENGTH_SHORT).show();
+            }
         }
     }
+
+
 
     /**
      * Adds the necessary polish to the DetailActivity ui using a progress bar while the data is loading behind the scene.
      */
-    public void showProgress(){
+    private void showProgress(){
         progressBar_detailActivity_loading.setVisibility(View.VISIBLE);
         imageView_detailActivity_poster.setVisibility(View.INVISIBLE);
         imageView_detailActivity_backdrop.setVisibility(View.INVISIBLE);
@@ -133,7 +173,7 @@ public class DetailActivity extends AppCompatActivity {
     /**
      * On the data load makes the ProgressBar invisible and displays the data.
      */
-    public void showData(){
+    private void showData(){
         progressBar_detailActivity_loading.setVisibility(View.INVISIBLE);
         cardView.setVisibility(View.VISIBLE);
         imageView_detailActivity_poster.setVisibility(View.VISIBLE);
@@ -172,53 +212,179 @@ public class DetailActivity extends AppCompatActivity {
                 return true;
             case (R.id.detailActivityMenuItem_share):
                 shareMovieInformation();
-                Log.i(TAG,movie.getMovieOriginalTitle()+" shared");
                 return true;
             case (R.id.detailActivityMenuItem_findInWeb):
                 findMovieInWeb();
-                Log.i(TAG,movie.getMovieOriginalTitle()+" triggered to find in web");
+                return true;
+            case (R.id.detailActivityMenuItem_Favorite):
+                if(popupMessage != null){
+                    popupMessage.cancel();
+                }
+                if(markMovieAsFavorite()){
+                    popupMessage = Toast.makeText(this,getString(R.string.marked_as_favorite),Toast.LENGTH_SHORT);
+                }else {
+                    popupMessage = Toast.makeText(this,getString(R.string.already_in_favorite),Toast.LENGTH_SHORT);
+                }
+                popupMessage.show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+        switch (loaderId){
+            case DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID:
+                return new CursorLoader(this
+                        ,selectedMovieDataUri
+                        ,MOVIE_DISPLAY_DATA_PROJECTION
+                        ,null
+                        ,null
+                        ,null);
+            default:
+                throw new RuntimeException("Loader not implemented: "+loaderId);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor selectedMovieDataCursor) {
+        if(selectedMovieDataCursor.getCount() > 0){
+            Log.d(TAG,"Data Size: "+selectedMovieDataCursor.getCount());
+            displayMovieDetails(selectedMovieDataCursor);
+        }
+        showData();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+    }
+
     /**
      * Method shareMovieInformation with the help of ShareCompat.IntentBuilder() method. This method would be called upon
-     * entering the share icon in the DetailActivity.
+     * entering the share icon in the DetailActivity. This method will fetch the required data from the database in the
+     * background thread.
      */
-    public void shareMovieInformation(){
-        String mimeType = "text/plain";
-        String title = movie.getMovieOriginalTitle();
-        ShareCompat.IntentBuilder.from(DetailActivity.this)
-                .setChooserTitle(title)
-                .setType(mimeType)
-                .setText(movie.getMovieWebUrl())
-                .startChooser();
+    private void shareMovieInformation(){
+        //Defining MIME type
+        final String mimeType = "text/plain";
+        //Defining the minimal projection for the require data for sharing
+        final String[] MOVIE_SHARE_INFO_PROJECTION = new String[]{
+                MovieContract.Movies.MOVIE_ORIGINAL_TITLE,
+                MovieContract.Movies.MOVIE_WEB_URL
+        };
+        //Defining the cursor index based on minimal projection.
+        final int INDEX_SHARE_INFO_TITLE_INDEX = 0;
+        final int INDEX_SHARE_INFO_WEB_URL = 1;
+
+        //Defining the Async Task to handle the database operation in background thread.
+        AsyncTask fetchMovieShareInfo = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                Cursor movieShareInfoCursor = getContentResolver().query(selectedMovieDataUri
+                        ,MOVIE_SHARE_INFO_PROJECTION
+                        ,null,null,null,null);
+                Log.d(TAG,"Retrieved Shared Info: "+movieShareInfoCursor.getCount());
+                movieShareInfoCursor.moveToFirst();
+                //Creating ShareCompat Intent for sharing data.
+                ShareCompat.IntentBuilder.from(DetailActivity.this)
+                        .setChooserTitle(movieShareInfoCursor.getString(INDEX_SHARE_INFO_TITLE_INDEX))
+                        .setType(mimeType)
+                        .setText(movieShareInfoCursor.getString(INDEX_SHARE_INFO_WEB_URL))
+                        .startChooser();
+                return null;
+            }
+        };
+        fetchMovieShareInfo.execute();
     }
 
     /**
      * Method findMovieInWeb creates a Uri from the Movie Web URL and triggers the Intent.ACTION_VIEW to view the content
-     * of the Uri.
+     * of the Uri. This method will fetch the required data from the database in the background thread.
      */
-    public void findMovieInWeb(){
-        Uri movieWebUri = Uri.parse(movie.getMovieWebUrl());
-        Intent intent = new Intent(Intent.ACTION_VIEW,movieWebUri);
-        if(intent.resolveActivity(getPackageManager())!=null){
-            startActivity(intent);
-        }
+    private void findMovieInWeb(){
+        //Defining the minimal projection for the require data
+        final String[] MOVIE_WEB_INFO_PROJECTION = new String[]{
+                MovieContract.Movies.MOVIE_WEB_URL
+        };
+        //Defining the cursor index based on minimal projection
+        final int INDEX_MINIMAL_WEB_URL = 0;
+
+        //Defining the Async Task to handle the database operation in background thread.
+        AsyncTask webInfo = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                Cursor movieWebInfoCursor = getContentResolver().query(selectedMovieDataUri
+                ,MOVIE_WEB_INFO_PROJECTION
+                ,null,null,null,null);
+                movieWebInfoCursor.moveToFirst();
+                Uri movieWebUri = Uri.parse(movieWebInfoCursor.getString(INDEX_MINIMAL_WEB_URL));
+                Intent intent = new Intent(Intent.ACTION_VIEW,movieWebUri);
+                if(intent.resolveActivity(getPackageManager())!=null){
+                    startActivity(intent);
+                }
+                return null;
+            }
+        };
+        webInfo.execute();
     }
 
-    /**Inner class for the DetailActivity to check the network connection in the device in background task*/
-    public class DetailActivityConnectionStatusUtil extends AsyncTask<Void,Void,Boolean> {
-        @Override
-        protected void onPreExecute() {
-            progressBar_detailActivity_loading.setVisibility(View.VISIBLE);
-        }
+    /**
+     * Mark a Movie as Favorite after checking that the movie is not marked as Favorite already.
+     * @return //boolean true if the Movie is not already Favorite and false otherwise.
+     */
+    private boolean markMovieAsFavorite(){
 
-        @Override
-        protected Boolean doInBackground(Void... voids) {
-            return MovieDataUtils.checkConnectivityStatus(DetailActivity.this);
+        boolean markedAsFavorite = false;
+
+        //Defining minimal projection to check if the Movie is already marked as Favorite.
+        final String[] FAVORITE_MOVIE_CHECK_MINIMAL_PROJECTION = new String[]{
+                MovieContract.Movies.IS_FAVORITE_MOVIE
+        };
+
+        //Defining Cursor index based on minimal projection.
+        final int INDEX_IS_FAVORITE_MOVIE = 0;
+
+        //Defining the Async Task to handle the database operation in background thread.
+        AsyncTask markMovieAsFavorite = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                boolean updateFlag = false;
+                //Fetching data to check if already marked as favorite
+                Cursor checkFavoriteMovieCursor = getContentResolver().query(selectedMovieDataUri
+                        ,FAVORITE_MOVIE_CHECK_MINIMAL_PROJECTION
+                        ,null,null,null);
+                checkFavoriteMovieCursor.moveToFirst();
+                //Retrieving the value of the IS_FAVORITE_MOVIE field
+                int isFavoriteMovie = checkFavoriteMovieCursor.getInt(INDEX_IS_FAVORITE_MOVIE);
+
+                //Checking if already a favorite or not
+                if(isFavoriteMovie == getResources().getInteger(R.integer.value_of_non_favorite_movie)){
+                    ContentValues markFavoriteContentValues = new ContentValues();
+
+                    //Marking as favorite if not
+                    markFavoriteContentValues.put(MovieContract.Movies.IS_FAVORITE_MOVIE
+                            ,getResources().getInteger(R.integer.value_of_favorite_movie));
+                    int rowsUpdated = getContentResolver().update(selectedMovieDataUri
+                            ,markFavoriteContentValues
+                            ,null
+                            ,null);
+                    if(rowsUpdated == 1){
+                        updateFlag = true;
+                    }
+                }
+                return  updateFlag;
+            }
+        };
+
+        //Getting the result from AsyncTask
+        try {
+            markedAsFavorite = (boolean) markMovieAsFavorite.execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
         }
+        return markedAsFavorite;
     }
 }

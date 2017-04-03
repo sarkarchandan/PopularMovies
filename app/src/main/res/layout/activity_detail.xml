@@ -5,7 +5,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
-    android:fitsSystemWindows="true"
     android:background="@color/color_movie">
 
 <android.support.constraint.ConstraintLayout
@@ -39,7 +38,7 @@
     <TextView
         tools:text="Dummy Movie Title"
         android:layout_width="0dp"
-        android:layout_height="@dimen/textView_detailActivity_originalTitle_height"
+        android:layout_height="wrap_content"
         android:layout_margin="16dp"
         android:layout_marginRight="8dp"
         android:id="@+id/textView_detailActivity_originalTitle"
@@ -108,10 +107,10 @@
         android:textColor="@color/movieInfo"
         android:fontFamily="monospace"
         app:layout_constraintTop_toBottomOf="@+id/cardView"
-        app:layout_constraintHorizontal_bias="0.0"
         android:layout_marginEnd="8dp"
         tools:layout_constraintRight_creator="1"
-        tools:layout_constraintLeft_creator="1" />
+        tools:layout_constraintLeft_creator="1"
+        android:layout_marginLeft="8dp" />
 
     <ProgressBar
         style="?android:attr/progressBarStyle"
@@ -134,21 +133,22 @@
         app:layout_constraintLeft_toLeftOf="parent"
         android:layout_marginEnd="16dp"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.027"
         app:layout_constraintTop_toTopOf="@+id/toolBar_activity_detail"
-        android:layout_marginTop="240dp"
+        android:layout_marginTop="207dp"
         android:elevation="20dp"
         android:id="@+id/cardView">
+
         <ImageView
+            android:id="@+id/imageView_detailActivity_poster"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:srcCompat="@android:drawable/btn_star"
-            android:id="@+id/imageView_detailActivity_poster"
-            app:layout_constraintTop_toTopOf="@+id/cardView"
+            android:scaleType="centerCrop"
             app:layout_constraintBottom_toBottomOf="@+id/cardView"
             app:layout_constraintLeft_toLeftOf="@+id/cardView"
-            android:scaleType="centerCrop"
-            app:layout_constraintRight_toRightOf="@+id/cardView" />
+            app:layout_constraintRight_toRightOf="@+id/cardView"
+            app:layout_constraintTop_toTopOf="@+id/cardView"
+            app:srcCompat="@android:drawable/btn_star" />
     </android.support.v7.widget.CardView>
 
 </android.support.constraint.ConstraintLayout>

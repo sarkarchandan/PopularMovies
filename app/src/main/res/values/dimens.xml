@@ -2,9 +2,10 @@
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
-    <dimen name="imageView_detailActivity_backdrop_height">300dp</dimen>
+    <dimen name="imageView_detailActivity_backdrop_height">270dp</dimen>
     <dimen name="textView_detailActivity_originalTitle_width">259dp</dimen>
     <dimen name="textView_detailActivity_originalTitle_height">39dp</dimen>
     <dimen name="cardView_activityDetails_width">120dp</dimen>
     <dimen name="cardView_activityDetail_height">170dp</dimen>
+    <dimen name="cardView_activityFavorite_height">200dp</dimen>
 </resources>
