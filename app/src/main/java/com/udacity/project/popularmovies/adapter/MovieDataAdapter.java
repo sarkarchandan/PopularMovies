@@ -57,8 +57,9 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
     @Override
     public MovieDataViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        boolean inflatedLayoutToBeAttachedToParent = false;
-        View view = layoutInflater.inflate(R.layout.movie_card,parent,inflatedLayoutToBeAttachedToParent);
+        View view = layoutInflater.inflate(R.layout.movie_card
+                ,parent
+                ,context.getResources().getBoolean(R.bool.inflatedLayoutToBeAttachedToParent));
         MovieDataViewHolder movieDataViewHolder = new MovieDataViewHolder(view);
         return movieDataViewHolder;
     }

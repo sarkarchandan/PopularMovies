@@ -14,7 +14,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     //Database name
     private static final String MOVIE_DATABASE_NAME = "movies.db";
     //Database version
-    private static final int MOVIE_DATABASE_VERSION = 5;
+    private static final int MOVIE_DATABASE_VERSION = 10;
 
     public MovieDBHelper(Context context){
         super(context,MOVIE_DATABASE_NAME,null,MOVIE_DATABASE_VERSION);
@@ -46,19 +46,20 @@ public class MovieDBHelper extends SQLiteOpenHelper {
         final String SQL_CREATE_TRAILERS_TABLE = "CREATE TABLE " +
                 MovieContract.Trailers.TRAILER_TABLE_NAME + "(" +
                 MovieContract.Trailers._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                MovieContract.Trailers.TRAILER_TMDB_ID + " TEXT NOT NULL, " +
+                MovieContract.Trailers.TRAILER_TMDB_ID + " TEXT, " +
                 MovieContract.Trailers.MOVIE_TMDB_ID + " INTEGER, " +
-                MovieContract.Trailers.TRAILER_URL + " TEXT NOT NULL " +
+                MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY + " TEXT, " +
+                MovieContract.Trailers.TRAILER_URL + " TEXT " +
                 ");";
 
         //Declaring reviews table schema
         final String SQL_CREATE_REVIEWS_TABLE = "CREATE TABLE " +
                 MovieContract.Reviews.REVIEW_TABLE_NAME + "(" +
                 MovieContract.Reviews._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                MovieContract.Reviews.REVIEW_TMDB_ID + " TEXT NOT NULL, " +
+                MovieContract.Reviews.REVIEW_TMDB_ID + " TEXT, " +
                 MovieContract.Reviews.MOVIE_TMDB_ID + " INTEGER, " +
-                MovieContract.Reviews.REVIEW_AUTHOR + " TEXT NOT NULL, " +
-                MovieContract.Reviews.REVIEW_CONTENT + " TEXT NOT NULL " +
+                MovieContract.Reviews.REVIEW_AUTHOR + " TEXT, " +
+                MovieContract.Reviews.REVIEW_CONTENT + " TEXT " +
                 ");";
 
         //Creating tables

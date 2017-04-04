@@ -47,9 +47,9 @@ public class MovieContentProvider extends ContentProvider {
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_MOVIES+"/#",MOVIE_WITH_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_MOVIES+"/*",MOVIE_WITH_TITLE);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS,REVIEWS);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS+"/#",TRAILER_WITH_MOVIE_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS+"/#",REVIEW_WITH_MOVIE_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS,TRAILERS);
-        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS+"/#",REVIEW_WITH_MOVIE_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS+"/#",TRAILER_WITH_MOVIE_ID);
         return uriMatcher;
     }
 

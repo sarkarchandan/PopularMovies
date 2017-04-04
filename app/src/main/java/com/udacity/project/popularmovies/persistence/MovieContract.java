@@ -1,6 +1,7 @@
 package com.udacity.project.popularmovies.persistence;
 
 import android.net.Uri;
+import android.net.wifi.ScanResult;
 import android.provider.BaseColumns;
 
 /**
@@ -58,6 +59,7 @@ public final class MovieContract {
         public static final String TRAILER_TABLE_NAME = "trailers";
         public static final String TRAILER_TMDB_ID = "movieTrailerTMDBId";
         public static final String MOVIE_TMDB_ID = "movieTMDBId";
+        public static final String MOVIE_TRAILER_YOUTUBE_KEY = "movieTrailerYouTubeKey";
         public static final String TRAILER_URL = "movieTrailerURL";
     }
 

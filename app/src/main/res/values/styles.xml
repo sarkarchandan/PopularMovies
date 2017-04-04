@@ -25,4 +25,10 @@
         <item name="colorControlActivated">#FF3D00</item>
     </style>
 
+    <style name="movieDetailTextStyle">
+        <item name="android:textStyle">bold</item>
+        <item name="android:fontFamily">monospace</item>
+        <item name="android:textColor">@color/movieInfo</item>
+    </style>
+
 </resources>

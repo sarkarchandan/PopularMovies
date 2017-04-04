@@ -161,14 +161,16 @@ public class DataProcessingUtils {
                     JSONObject movieVideoObject = movieVideoJSONArray.getJSONObject(k);
 
                     //Constructing YouTube Video URI
+                    String TRAILER_YOUTUBE_KEY = movieVideoObject.getString(VIDEO_KEY);
                     Uri youtubeVideoUri = Uri.parse(YOUTUBE_BASE_URL).buildUpon()
-                            .appendQueryParameter(YOUTUBE_VIDEO_PARAM,movieVideoObject.getString(VIDEO_KEY))
+                            .appendQueryParameter(YOUTUBE_VIDEO_PARAM,TRAILER_YOUTUBE_KEY)
                             .build();
 
                     //Constructing the collection of the MovieTrailer
                     if(movieVideoObject.getString(VIDEO_TYPE).equals(VIDEO_TRAILER_KEY)){
                         movieTrailers.add(
                                 new MovieTrailer(movieVideoObject.getString(VIDEO_TMDB_ID)
+                                        ,TRAILER_YOUTUBE_KEY
                                         , youtubeVideoUri.toString())
                         );
                     }

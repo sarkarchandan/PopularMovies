@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.support.design.widget.TabLayout;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.app.ShareCompat;
 import android.support.v4.content.ContextCompat;
@@ -15,6 +16,8 @@ import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +33,8 @@ import android.widget.Toast;
 import com.udacity.project.popularmovies.R;
 
 import com.squareup.picasso.Picasso;
+import com.udacity.project.popularmovies.adapter.MovieReviewResourceAdapter;
+import com.udacity.project.popularmovies.adapter.MovieTrailerResourceAdapter;
 import com.udacity.project.popularmovies.model.Movie;
 import com.udacity.project.popularmovies.persistence.MovieContract;
 import com.udacity.project.popularmovies.utilities.MovieDataUtils;
@@ -39,7 +44,9 @@ import java.util.concurrent.ExecutionException;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class DetailActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor>
+        ,TabLayout.OnTabSelectedListener {
 
     //Constant to be used for logging
     private static final String TAG = DetailActivity.class.getSimpleName();
@@ -63,12 +70,26 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public ProgressBar progressBar_detailActivity_loading;
     @BindView(R.id.cardView)
     public CardView cardView;
+    @BindView(R.id.tabLayout_detail_Activity_resourceType_switcher)
+    public TabLayout tabLayout_detail_Activity_resourceType_switcher;
+    @BindView(R.id.recyclerView_activity_Detail_resource_switcher)
+    public RecyclerView recyclerView_activity_Detail_resource_switcher;
 
-    //Identifier for the CursorLoader
+
+    //Constant to be used as key to store the selected tab inside Bundle in order to support the rotation behavior.
+    private static final String SELECTED_TAB_INDEX_KEY = "selected-tab-index";
+    private static int selectedTabIndex;
+
+    //Constant that denotes the default selected tab when the app launches.
+    private static final int DEFAULT_SELECTED_TAB = 0;
+
+    //Identifier for the CursorLoader for General Movie Data
     private static final int DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID = 3018;
+
 
     //Defining the projection for fetching selected Movie data.
     private static final String[] MOVIE_DISPLAY_DATA_PROJECTION = new String[]{
+            MovieContract.Movies.MOVIE_TMDB_ID,
             MovieContract.Movies.MOVIE_ORIGINAL_TITLE,
             MovieContract.Movies.MOVIE_BACKDROP_URL,
             MovieContract.Movies.MOVIE_POSTER_URL,
@@ -78,16 +99,43 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     };
 
     //Defining the Cursor Index based on projection.
-    private static final int INDEX_MOVIE_ORIGINAL_TITLE = 0;
-    private static final int INDEX_MOVIE_BACKDROP_URL = 1;
-    private static final int INDEX_MOVIE_POSTER_URL = 2;
-    private static final int INDEX_MOVIE_PLOT_SYNOPSIS = 3;
-    private static final int INDEX_MOVIE_RATING = 4;
-    private static final int INDEX_MOVIE_RELEASE_DATE = 5;
+    private static final int INDEX_MOVIE_TMDB_ID = 0;
+    private static final int INDEX_MOVIE_ORIGINAL_TITLE = 1;
+    private static final int INDEX_MOVIE_BACKDROP_URL = 2;
+    private static final int INDEX_MOVIE_POSTER_URL = 3;
+    private static final int INDEX_MOVIE_PLOT_SYNOPSIS = 4;
+    private static final int INDEX_MOVIE_RATING = 5;
+    private static final int INDEX_MOVIE_RELEASE_DATE = 6;
+
+    //Defining the projection for fetching the Trailer data for a selected Movie
+    private static final String[] DISPLAY_MOVIE_TRAILER_PROJECTION = new String[]{
+            MovieContract.Trailers._ID,
+            MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY,
+            MovieContract.Trailers.TRAILER_URL
+    };
+
+    //Defining the Cursor Index based on projection
+    public static final int INDEX_MOVIE_TRAILER_ID = 0;
+    public static final int INDEX_MOVIE_TRAILER_YOUTUBE_KEY = 1;
+    public static final int INDEX_MOVIE_TRAILER_URL = 2;
+
+
+    //Defining the projection for fetching the Review data for a selected Movie
+    private static final String[] DISPLAY_MOVIE_REVIEW_PROJECTION = new String[]{
+            MovieContract.Reviews._ID,
+            MovieContract.Reviews.REVIEW_AUTHOR,
+            MovieContract.Reviews.REVIEW_CONTENT
+    };
+
+    //Defining the Cursor Index based on projection
+    public static final int INDEX_MOVIE_REVIEW_ID = 0;
+    public static final int INDEX_MOVIE_REVIEW_AUTHOR = 1;
+    public static final int INDEX_MOVIE_REVIEW_CONTENT = 2;
 
     private Context context;
     private Intent selectedMovieIntent;
     private static Uri selectedMovieDataUri;
+    private static int currentlyDisplayedMovieTMDBId;
     private Toast popupMessage;
 
     @Override
@@ -107,6 +155,70 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             selectedMovieDataUri = selectedMovieIntent.getData();
             getSupportLoaderManager().initLoader(DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID,null,this);
         }
+
+
+        //Customizing the TabLayout.
+        tabLayout_detail_Activity_resourceType_switcher.setSelectedTabIndicatorColor(ContextCompat.getColor(this,R.color.selectedTabIndicatorColor));
+        tabLayout_detail_Activity_resourceType_switcher.setBackgroundColor(ContextCompat.getColor(this,R.color.colorPrimary));
+        tabLayout_detail_Activity_resourceType_switcher.setTabTextColors(ContextCompat.getColor(this,android.R.color.white)
+                ,ContextCompat.getColor(this,R.color.selectedTabTextColor));
+
+        //Adding new tabs in the TabLayout.
+        tabLayout_detail_Activity_resourceType_switcher.addTab(
+                tabLayout_detail_Activity_resourceType_switcher.newTab().setText(getString(R.string.option_trailers))
+        );
+        tabLayout_detail_Activity_resourceType_switcher.addTab(
+                tabLayout_detail_Activity_resourceType_switcher.newTab().setText(getString(R.string.option_reviews))
+        );
+
+        //Adding OnTabSelectedListener to the TabLayout
+        tabLayout_detail_Activity_resourceType_switcher.addOnTabSelectedListener(this);
+
+        //Handling the app behavior on Create and on rotation.
+        if(savedInstanceState == null){
+            tabLayout_detail_Activity_resourceType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
+        }else {
+            tabLayout_detail_Activity_resourceType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
+        }
+    }
+
+
+    /**
+     * Provide implementation of what happens when a tab is selected.
+     * @param tab
+     */
+    @Override
+    public void onTabSelected(TabLayout.Tab tab) {
+        selectedTabIndex = tab.getPosition();
+
+        Log.d(TAG,"Currently Selected Tab: "+selectedTabIndex);
+
+        if(selectedTabIndex == 0){
+            fetchMovieTrailersData();
+        }else{
+            fetchMovieReviewData();
+        }
+    }
+
+    @Override
+    public void onTabUnselected(TabLayout.Tab tab) {
+
+    }
+
+    @Override
+    public void onTabReselected(TabLayout.Tab tab) {
+
+    }
+
+    /**
+     * Implementation of the onSavedInstanceState to restore the instance state of the MainActivity in case the
+     * the device is rotated.
+     * @param outState// Bundle that stores temporary data in case the Activity is to be destroyed and recreated.
+     */
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
     }
 
     /**
@@ -122,7 +234,14 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             String selectedMoviePosterURL = selectedMovieDataCursor.getString(INDEX_MOVIE_POSTER_URL);
             String selectedMoviePlotSynopsis = selectedMovieDataCursor.getString(INDEX_MOVIE_PLOT_SYNOPSIS);
             float selectedMovieRating = selectedMovieDataCursor.getFloat(INDEX_MOVIE_RATING);
-            String selectedMovieReleaseDate = selectedMovieDataCursor.getString(INDEX_MOVIE_RELEASE_DATE);
+
+            String selectedMovieReleaseDate;
+
+            if(selectedMovieDataCursor.getString(INDEX_MOVIE_RELEASE_DATE).toString().equals("")) {
+                selectedMovieReleaseDate = getString(R.string.not_released);
+            }else {
+                selectedMovieReleaseDate = selectedMovieDataCursor.getString(INDEX_MOVIE_RELEASE_DATE);
+            }
 
             Picasso.with(context).setLoggingEnabled(true);
             Picasso.with(context)
@@ -145,14 +264,109 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             ratingBar_detailActivity_movieRating.setStepSize(1);
             ratingBar_detailActivity_movieRating.setRating(selectedMovieRating);
 
-            textView_detailActivity_plot_synopsis.setText(getString(R.string.movie_synopsis));
-            textView_detailActivity_plot_synopsis.append("\n"+selectedMoviePlotSynopsis);
+            textView_detailActivity_plot_synopsis.setText(selectedMoviePlotSynopsis);
 
             if(!MovieDataUtils.checkConnectionStatusInBackground(context)){
                 Toast.makeText(context,getString(R.string.no_connectivity),Toast.LENGTH_SHORT).show();
             }
         }
     }
+
+    /**
+     * Fetches and loads the Movie Trailers from the database in background thread.
+     */
+    public void fetchMovieTrailersData(){
+
+        Cursor trailerCursor=null;
+        MovieTrailerResourceAdapter movieTrailerResourceAdapter = null;
+
+        //Constructing the Uri for fetching the Trailers data for the currently displayed Movie.
+        final Uri selectedMovieTrailerDataUri = MovieContract.Trailers.TRAILERS_CONTENT_URI.buildUpon()
+                .appendPath(String.valueOf(currentlyDisplayedMovieTMDBId))
+                .build();
+
+        //Defining AsyncTask for performing database query in the background thread.
+        AsyncTask fetchMovieTrailerAsyncTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                Cursor cursor = getContentResolver().query(selectedMovieTrailerDataUri
+                        ,DISPLAY_MOVIE_TRAILER_PROJECTION
+                        ,null
+                        ,null
+                        ,null
+                        ,null);
+                return cursor;
+            }
+        };
+
+        //Executing AsyncTask.
+        try {
+            trailerCursor = (Cursor) fetchMovieTrailerAsyncTask.execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        Log.d(TAG,"No of Trailers: "+trailerCursor.getCount());
+
+        //Initializing MovieTrailerResourceAdapter in case we have got non zero Movie Trailers
+        if(trailerCursor.getCount() > 0){
+            movieTrailerResourceAdapter = new MovieTrailerResourceAdapter(trailerCursor,this);
+        }
+        //Configuring the Resource Switcher RecyclerView.
+        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
+    }
+
+    /**
+     * Fetches and loads the Movie Trailers from the database in background thread.
+     */
+    public void fetchMovieReviewData(){
+
+        Cursor reviewCursor = null;
+        MovieReviewResourceAdapter movieReviewResourceAdapter = null;
+
+        //Constructing the Uri for fetching the Reviews data for the currently displayed Movie.
+        final Uri movieReviewDataUri = MovieContract.Reviews.REVIEWS_CONTENT_URI.buildUpon()
+                .appendPath(String.valueOf(currentlyDisplayedMovieTMDBId))
+                .build();
+
+        //Defining AsyncTask for performing database query in the background thread.
+        AsyncTask fetchMovieReviewsAsyncTask = new AsyncTask() {
+            @Override
+            protected Object doInBackground(Object[] objects) {
+                Cursor cursor = getContentResolver().query(movieReviewDataUri
+                        ,DISPLAY_MOVIE_REVIEW_PROJECTION
+                        ,null
+                        ,null
+                        ,null);
+                return cursor;
+            }
+        };
+
+        //Executing AsyncTask
+        try {
+            reviewCursor = (Cursor) fetchMovieReviewsAsyncTask.execute().get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        Log.d(TAG,"No of Reviews: "+reviewCursor.getCount());
+
+        if(reviewCursor.getCount() > 0){
+            movieReviewResourceAdapter = new MovieReviewResourceAdapter(reviewCursor,this);
+        }
+
+        //Configuring the Resource Switcher RecyclerView.
+        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_activity_Detail_resource_switcher.setAdapter(movieReviewResourceAdapter);
+    }
+
+
+
+
 
 
 
@@ -167,6 +381,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         ratingBar_detailActivity_movieRating.setVisibility(View.INVISIBLE);
         textView_detailActivity_movie_releaseDate.setVisibility(View.INVISIBLE);
         textView_detailActivity_plot_synopsis.setVisibility(View.INVISIBLE);
+        tabLayout_detail_Activity_resourceType_switcher.setVisibility(View.INVISIBLE);
+        recyclerView_activity_Detail_resource_switcher.setVisibility(View.INVISIBLE);
         cardView.setVisibility(View.INVISIBLE);
     }
 
@@ -182,6 +398,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         ratingBar_detailActivity_movieRating.setVisibility(View.VISIBLE);
         textView_detailActivity_movie_releaseDate.setVisibility(View.VISIBLE);
         textView_detailActivity_plot_synopsis.setVisibility(View.VISIBLE);
+        tabLayout_detail_Activity_resourceType_switcher.setVisibility(View.VISIBLE);
+        recyclerView_activity_Detail_resource_switcher.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -233,7 +451,8 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int loaderId, Bundle args) {
+    public Loader<Cursor> onCreateLoader(int loaderId, Bundle bundleArgument) {
+
         switch (loaderId){
             case DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID:
                 return new CursorLoader(this
@@ -249,10 +468,14 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor selectedMovieDataCursor) {
+
         if(selectedMovieDataCursor.getCount() > 0){
-            Log.d(TAG,"Data Size: "+selectedMovieDataCursor.getCount());
+            Log.d(TAG,"Cursor Size: "+selectedMovieDataCursor.getCount());
+            selectedMovieDataCursor.moveToFirst();
+            currentlyDisplayedMovieTMDBId = selectedMovieDataCursor.getInt(INDEX_MOVIE_TMDB_ID);
             displayMovieDetails(selectedMovieDataCursor);
         }
+        fetchMovieTrailersData();
         showData();
     }
 

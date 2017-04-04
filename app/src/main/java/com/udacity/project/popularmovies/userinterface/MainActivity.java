@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity
     @BindView(R.id.loading_activity_main)
     public ProgressBar progressBar_load;
     @BindView(R.id.recyclerView_activity_main_movie_data)
-    public RecyclerView recyclerView_moviedata;
+    public RecyclerView recyclerView_movieData;
 
     //Toast reference for making appropriate Toast
     private Toast message;
@@ -103,14 +103,16 @@ public class MainActivity extends AppCompatActivity
         tabLayout_main_Activity_movieType_switcher.setBackgroundColor(ContextCompat.getColor(this,R.color.colorPrimary));
         tabLayout_main_Activity_movieType_switcher.setTabTextColors(ContextCompat.getColor(this,android.R.color.white)
         ,ContextCompat.getColor(this,R.color.selectedTabTextColor));
-        tabLayout_main_Activity_movieType_switcher.addTab(
-                tabLayout_main_Activity_movieType_switcher.newTab().setText(getString(R.string.popular_movies))
-        );
 
         //Adding new tabs in the TabLayout.
         tabLayout_main_Activity_movieType_switcher.addTab(
+                tabLayout_main_Activity_movieType_switcher.newTab().setText(getString(R.string.popular_movies))
+        );
+        tabLayout_main_Activity_movieType_switcher.addTab(
                 tabLayout_main_Activity_movieType_switcher.newTab().setText(getString(R.string.top_rated_movies))
         );
+
+        //Adding OnTabSelectedListener to the TabLayout
         tabLayout_main_Activity_movieType_switcher.addOnTabSelectedListener(this);
 
         //Initializing the Bundle
@@ -179,7 +181,7 @@ public class MainActivity extends AppCompatActivity
      * Method showProgress adds the necessary polish for the ui in the MainActivity by introducing progress bar as appropriate.
      */
     public void showProgress(){
-        recyclerView_moviedata.setVisibility(View.INVISIBLE);
+        recyclerView_movieData.setVisibility(View.INVISIBLE);
         progressBar_load.setVisibility(View.VISIBLE);
     }
 
@@ -188,7 +190,7 @@ public class MainActivity extends AppCompatActivity
      */
     public void showData(){
         progressBar_load.setVisibility(View.INVISIBLE);
-        recyclerView_moviedata.setVisibility(View.VISIBLE);
+        recyclerView_movieData.setVisibility(View.VISIBLE);
     }
 
     /**
@@ -242,11 +244,9 @@ public class MainActivity extends AppCompatActivity
      */
     public void loadMovieData(Cursor movieCursor){
         MovieDataAdapter movieDataAdapter=null;
-        recyclerView_moviedata.setLayoutManager(new GridLayoutManager(this,calculateNoOfColumns(getBaseContext())));
-        if(movieCursor.getCount() > 0){
+        recyclerView_movieData.setLayoutManager(new GridLayoutManager(this,calculateNoOfColumns(getBaseContext())));
            movieDataAdapter = new MovieDataAdapter(movieCursor,this);
-        }
-        recyclerView_moviedata.setAdapter(movieDataAdapter);
+        recyclerView_movieData.setAdapter(movieDataAdapter);
         movieDataAdapter.setOnMovieCardClickListener(this);
     }
 
@@ -308,6 +308,9 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        while (data.getCount() ==0){
+            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
+        }
         loadMovieData(data);
         showData();
     }

@@ -100,6 +100,7 @@ public class DataPopulationTasks {
                         ContentValues trailerContentValues = new ContentValues();
                         trailerContentValues.put(MovieContract.Trailers.TRAILER_TMDB_ID,movieTrailer.getMovieTrailerTMDBId());
                         trailerContentValues.put(MovieContract.Trailers.MOVIE_TMDB_ID,movie.getMovieTMDBId());
+                        trailerContentValues.put(MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY,movieTrailer.getMovieTrailerKey());
                         trailerContentValues.put(MovieContract.Trailers.TRAILER_URL,movieTrailer.getMovieTrailerURL());
                         //Persisting data to the trailers directory
                         contentResolver.insert(trailersContentUri,trailerContentValues);

@@ -5,7 +5,8 @@
     <color name="colorAccent">#373F51</color>
     <color name="colorMovieCard">#373F51</color>
     <color name="black_alpha_40">#66000000</color>
-    <color name="color_movie">#212121</color>
+    <color name="color_movie">#283018</color>
+    <color name="color_experimental">#aa863a</color>
     <color name="movieInfo">#FAFAFA</color>
     <color name="titleColor">#FAFAFA</color>
     <color name="selectedTabTextColor">#F6AA1C</color>

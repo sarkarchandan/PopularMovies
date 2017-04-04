@@ -10,6 +10,12 @@
     <string name="already_in_favorite">Already In Favorite</string>
     <string name="marked_as_favorite">Added To Favorites</string>
     <string name="no_connectivity">Data Network Not Available</string>
+    <string name="not_released">Not Released Yet</string>
+    <string name="option_trailers">Trailers</string>
+    <string name="option_reviews">Reviews</string>
+    <string name="author_says">says</string>
+    <string name="say_sorry">Sorry !!!</string>
+    <string name="no_review_available">No Review Available for This Movie</string>
 
     <!--String resources for the menu items-->
     <string name="favorite_movies">Favorites</string>

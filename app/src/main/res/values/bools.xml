@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--Boolean resource to be used by all Adapters-->
+    <bool name="inflatedLayoutToBeAttachedToParent">false</bool>
+
+</resources>

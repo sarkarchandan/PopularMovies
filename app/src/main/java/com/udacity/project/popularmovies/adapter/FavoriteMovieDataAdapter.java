@@ -52,8 +52,9 @@ public class FavoriteMovieDataAdapter extends RecyclerView.Adapter<FavoriteMovie
     @Override
     public FavoriteMoviesViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        boolean inflatedLayoutToBeAttachedToParent = false;
-        View view = layoutInflater.inflate(R.layout.favorite_movie_card,parent,inflatedLayoutToBeAttachedToParent);
+        View view = layoutInflater.inflate(R.layout.favorite_movie_card
+                ,parent
+                ,context.getResources().getBoolean(R.bool.inflatedLayoutToBeAttachedToParent));
         return new FavoriteMoviesViewHolder(view);
     }
 
