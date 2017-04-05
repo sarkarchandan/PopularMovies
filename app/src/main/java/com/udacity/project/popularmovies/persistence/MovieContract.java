@@ -60,7 +60,6 @@ public final class MovieContract {
         public static final String TRAILER_TMDB_ID = "movieTrailerTMDBId";
         public static final String MOVIE_TMDB_ID = "movieTMDBId";
         public static final String MOVIE_TRAILER_YOUTUBE_KEY = "movieTrailerYouTubeKey";
-        public static final String TRAILER_URL = "movieTrailerURL";
     }
 
     //Table 'reviews' definition template

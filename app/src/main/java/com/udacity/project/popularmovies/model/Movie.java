@@ -19,10 +19,8 @@ public class Movie implements Parcelable {
     private String moviePlotSynopsis;
     private float movieRating;
     private String movieReleaseDate;
-    private List<MovieTrailer> movieTrailers;
-    private List<MovieReview> movieReviews;
 
-    public Movie(int movieTMDBId, String movieOriginalTitle, String moviePosterUrl, String movieBackDropUrl, String movieWebUrl, String moviePlotSynopsis, float movieRating, String movieReleaseDate, List<MovieTrailer> movieTrailers, List<MovieReview> movieReviews) {
+    public Movie(int movieTMDBId, String movieOriginalTitle, String moviePosterUrl, String movieBackDropUrl, String movieWebUrl, String moviePlotSynopsis, float movieRating, String movieReleaseDate) {
         this.movieTMDBId = movieTMDBId;
         this.movieOriginalTitle = movieOriginalTitle;
         this.moviePosterUrl = moviePosterUrl;
@@ -31,8 +29,6 @@ public class Movie implements Parcelable {
         this.moviePlotSynopsis = moviePlotSynopsis;
         this.movieRating = movieRating;
         this.movieReleaseDate = movieReleaseDate;
-        this.movieTrailers = movieTrailers;
-        this.movieReviews = movieReviews;
     }
 
     private Movie(Parcel parcel) {
@@ -44,8 +40,6 @@ public class Movie implements Parcelable {
         moviePlotSynopsis = parcel.readString();
         movieRating = parcel.readFloat();
         movieReleaseDate = parcel.readString();
-        movieReviews = parcel.readArrayList(MovieReview.class.getClassLoader());
-        movieTrailers = parcel.readArrayList(MovieTrailer.class.getClassLoader());
     }
 
     public int getMovieTMDBId() {
@@ -112,22 +106,6 @@ public class Movie implements Parcelable {
         this.movieReleaseDate = movieReleaseDate;
     }
 
-    public List<MovieTrailer> getMovieTrailers() {
-        return movieTrailers;
-    }
-
-    public void setMovieTrailers(List<MovieTrailer> movieTrailers) {
-        this.movieTrailers = movieTrailers;
-    }
-
-    public List<MovieReview> getMovieReviews() {
-        return movieReviews;
-    }
-
-    public void setMovieReviews(List<MovieReview> movieReviews) {
-        this.movieReviews = movieReviews;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -143,8 +121,6 @@ public class Movie implements Parcelable {
         parcel.writeString(moviePlotSynopsis);
         parcel.writeFloat(movieRating);
         parcel.writeString(movieReleaseDate);
-        parcel.writeList(movieReviews);
-        parcel.writeList(movieTrailers);
     }
 
     public static final Parcelable.Creator<Movie> CREATOR = new Parcelable.Creator<Movie>(){

@@ -29,10 +29,19 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
 
     private Cursor movieTrailerCursor;
     private Context context;
+    private OnMovieTrailerClikcListener onMovieTrailerClikcListener;
 
     public MovieTrailerResourceAdapter(Cursor movieTrailerCursor, Context context) {
         this.movieTrailerCursor = movieTrailerCursor;
         this.context = context;
+    }
+
+    public interface OnMovieTrailerClikcListener{
+        void onMovieTrailerClick(String movieTrailerYoutubeKey);
+    }
+
+    public void setOnMovieTrailerClikcListener(OnMovieTrailerClikcListener onMovieTrailerClikcListener) {
+        this.onMovieTrailerClikcListener = onMovieTrailerClikcListener;
     }
 
     @Override
@@ -42,6 +51,17 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
                 ,parent
                 ,context.getResources().getBoolean(R.bool.inflatedLayoutToBeAttachedToParent));
         return new MovieTrailerItemViewHolder(view);
+    }
+
+    /**
+     * Replaces the existing Cursor with a new Cursor.
+     * @param newCursor
+     */
+    public void swapCursor(Cursor newCursor){
+        if(newCursor != null){
+            movieTrailerCursor = newCursor;
+        }
+        notifyDataSetChanged();
     }
 
     @Override
@@ -68,7 +88,7 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
         return movieTrailerCursor.getCount();
     }
 
-    public class MovieTrailerItemViewHolder extends RecyclerView.ViewHolder{
+    public class MovieTrailerItemViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         @BindView(R.id.cardView_movie_trailer_item_container)
         public CardView cardView_movie_trailer_item_container;
@@ -78,6 +98,13 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
         public MovieTrailerItemViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this,itemView);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+            movieTrailerCursor.moveToPosition(getAdapterPosition());
+            onMovieTrailerClikcListener.onMovieTrailerClick(movieTrailerCursor.getString(DetailActivity.INDEX_MOVIE_TRAILER_YOUTUBE_KEY));
         }
     }
 }

@@ -14,7 +14,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     //Database name
     private static final String MOVIE_DATABASE_NAME = "movies.db";
     //Database version
-    private static final int MOVIE_DATABASE_VERSION = 10;
+    private static final int MOVIE_DATABASE_VERSION = 11;
 
     public MovieDBHelper(Context context){
         super(context,MOVIE_DATABASE_NAME,null,MOVIE_DATABASE_VERSION);
@@ -48,8 +48,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
                 MovieContract.Trailers._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 MovieContract.Trailers.TRAILER_TMDB_ID + " TEXT, " +
                 MovieContract.Trailers.MOVIE_TMDB_ID + " INTEGER, " +
-                MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY + " TEXT, " +
-                MovieContract.Trailers.TRAILER_URL + " TEXT " +
+                MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY + " TEXT " +
                 ");";
 
         //Declaring reviews table schema

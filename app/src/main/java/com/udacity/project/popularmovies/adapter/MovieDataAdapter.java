@@ -38,7 +38,7 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
 
     /**Defining Callback interface to implement the click event*/
     public interface OnMovieCardClickListener{
-        void onMovieCardClick(long position);
+        void onMovieCardClick(long position,int movieTMDBId);
     }
 
     /**Setter method for OnMovieCardClickListener*/
@@ -108,7 +108,9 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
         @Override
         public void onClick(View view) {
             movieCursor.moveToPosition(getAdapterPosition());
-            onMovieCardClickListener.onMovieCardClick(movieCursor.getLong(MainActivity.INDEX_MOVIE_DB_ID));
+            long positionInCursor = movieCursor.getLong(MainActivity.INDEX_MOVIE_DB_ID);
+            int movieTMDBId = movieCursor.getInt(MainActivity.INDEX_MOVIE_TMDB_ID);
+            onMovieCardClickListener.onMovieCardClick(positionInCursor,movieTMDBId);
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.udacity.project.popularmovies.userinterface;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
@@ -14,7 +13,6 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.DisplayMetrics;
 import android.view.MenuItem;
 
 import com.udacity.project.popularmovies.R;
@@ -27,6 +25,9 @@ import butterknife.ButterKnife;
 public class FavoriteActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>
         ,FavoriteMovieDataAdapter.OnFavoriteMovieClickListener{
+
+    //Constant defined for logging
+    private static final String TAG = FavoriteActivity.class.getSimpleName();
 
     //Defining minimal projection for the Favorite movie poster URL
     public static final String[] FAVORITE_MOVIE_MINIMAL_PROJECTION = new String[]{
@@ -76,8 +77,9 @@ public class FavoriteActivity extends AppCompatActivity implements
                 getSupportLoaderManager().restartLoader(FAVORITE_MOVIE_LOADER_ID,null,FavoriteActivity.this);
             }
         }).attachToRecyclerView(recyclerView_activity_favorite_movies);
-
     }
+
+
 
     /**
      * Updates appropriate field of the Movie to

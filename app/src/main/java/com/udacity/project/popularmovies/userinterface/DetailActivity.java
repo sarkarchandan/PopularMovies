@@ -37,6 +37,8 @@ import com.udacity.project.popularmovies.adapter.MovieReviewResourceAdapter;
 import com.udacity.project.popularmovies.adapter.MovieTrailerResourceAdapter;
 import com.udacity.project.popularmovies.model.Movie;
 import com.udacity.project.popularmovies.persistence.MovieContract;
+import com.udacity.project.popularmovies.service.DataPopulationIntentService;
+import com.udacity.project.popularmovies.service.DataPopulationTasks;
 import com.udacity.project.popularmovies.utilities.MovieDataUtils;
 
 import java.util.concurrent.ExecutionException;
@@ -46,7 +48,8 @@ import butterknife.ButterKnife;
 
 public class DetailActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor>
-        ,TabLayout.OnTabSelectedListener {
+        ,TabLayout.OnTabSelectedListener
+        ,MovieTrailerResourceAdapter.OnMovieTrailerClikcListener {
 
     //Constant to be used for logging
     private static final String TAG = DetailActivity.class.getSimpleName();
@@ -75,10 +78,16 @@ public class DetailActivity extends AppCompatActivity implements
     @BindView(R.id.recyclerView_activity_Detail_resource_switcher)
     public RecyclerView recyclerView_activity_Detail_resource_switcher;
 
+    //Constant for putting the TMDB MovieId in to the Intent before launching the IntentService.
+    public static final String SELECTED_MOVIE_RESOURCES_INTENT_KEY = "selected-movie-resource-intent-key";
+
+    //This default constant for the TMDB MovieId will be used when we need to launch either the IntentService or JobService with
+    //default value
+    public static final int MOVIE_ID_DEFAULT_VALUE = 0;
 
     //Constant to be used as key to store the selected tab inside Bundle in order to support the rotation behavior.
     private static final String SELECTED_TAB_INDEX_KEY = "selected-tab-index";
-    private static int selectedTabIndex;
+    private static int selectedTabIndex = 0;
 
     //Constant that denotes the default selected tab when the app launches.
     private static final int DEFAULT_SELECTED_TAB = 0;
@@ -109,28 +118,22 @@ public class DetailActivity extends AppCompatActivity implements
 
     //Defining the projection for fetching the Trailer data for a selected Movie
     private static final String[] DISPLAY_MOVIE_TRAILER_PROJECTION = new String[]{
-            MovieContract.Trailers._ID,
             MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY,
-            MovieContract.Trailers.TRAILER_URL
     };
 
     //Defining the Cursor Index based on projection
-    public static final int INDEX_MOVIE_TRAILER_ID = 0;
-    public static final int INDEX_MOVIE_TRAILER_YOUTUBE_KEY = 1;
-    public static final int INDEX_MOVIE_TRAILER_URL = 2;
+    public static final int INDEX_MOVIE_TRAILER_YOUTUBE_KEY = 0;
 
 
     //Defining the projection for fetching the Review data for a selected Movie
     private static final String[] DISPLAY_MOVIE_REVIEW_PROJECTION = new String[]{
-            MovieContract.Reviews._ID,
             MovieContract.Reviews.REVIEW_AUTHOR,
             MovieContract.Reviews.REVIEW_CONTENT
     };
 
     //Defining the Cursor Index based on projection
-    public static final int INDEX_MOVIE_REVIEW_ID = 0;
-    public static final int INDEX_MOVIE_REVIEW_AUTHOR = 1;
-    public static final int INDEX_MOVIE_REVIEW_CONTENT = 2;
+    public static final int INDEX_MOVIE_REVIEW_AUTHOR = 0;
+    public static final int INDEX_MOVIE_REVIEW_CONTENT = 1;
 
     private Context context;
     private Intent selectedMovieIntent;
@@ -149,12 +152,20 @@ public class DetailActivity extends AppCompatActivity implements
         getSupportActionBar().setDisplayShowTitleEnabled(false);
         showProgress();
 
+
         //Handling the Intent that has been passed on from the previous Activity to display the specific Movie data
         selectedMovieIntent = getIntent();
         if (selectedMovieIntent != null) {
             selectedMovieDataUri = selectedMovieIntent.getData();
+            currentlyDisplayedMovieTMDBId = selectedMovieIntent.getIntExtra(MainActivity.MOVIE_TMDB_ID_INTENT_KEY,MOVIE_ID_DEFAULT_VALUE);
             getSupportLoaderManager().initLoader(DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID,null,this);
         }
+
+        //Starting the Service in background to update the database in case there is any new movie data available.
+        Intent resourcePopulationServiceIntent = new Intent(this, DataPopulationIntentService.class);
+        resourcePopulationServiceIntent.setAction(DataPopulationTasks.ACTION_POPULATE_MOVIE_RESOURCES);
+        resourcePopulationServiceIntent.putExtra(SELECTED_MOVIE_RESOURCES_INTENT_KEY,currentlyDisplayedMovieTMDBId);
+        startService(resourcePopulationServiceIntent);
 
 
         //Customizing the TabLayout.
@@ -175,11 +186,16 @@ public class DetailActivity extends AppCompatActivity implements
         tabLayout_detail_Activity_resourceType_switcher.addOnTabSelectedListener(this);
 
         //Handling the app behavior on Create and on rotation.
-        if(savedInstanceState == null){
-            tabLayout_detail_Activity_resourceType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
-        }else {
-            tabLayout_detail_Activity_resourceType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
+        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
+            selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
         }
+        //tabLayout_detail_Activity_resourceType_switcher.getTabAt(selectedTabIndex).select();
+//        if(savedInstanceState == null){
+//            tabLayout_detail_Activity_resourceType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
+//        }else {
+//            tabLayout_detail_Activity_resourceType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
+//        }
+        fetchMovieTrailersData();
     }
 
 
@@ -222,10 +238,25 @@ public class DetailActivity extends AppCompatActivity implements
     }
 
     /**
+     * I have observed an issue with the loading of Trailer and Reviews on start up. Sometimes they load as they should and
+     * sometimes they don't on launch of DetailActivity.
+     * Hence, we have added this countermeasure. However I am trying to find out a better solution.
+     *
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG,"onStart called");
+        tabLayout_detail_Activity_resourceType_switcher.getTabAt(selectedTabIndex).select();
+    }
+
+    /**
      * This method displays the data about a Movie in the ui and
      * @param selectedMovieDataCursor //Cursor with the Movie data
      */
     private void displayMovieDetails(Cursor selectedMovieDataCursor){
+
+        fetchMovieTrailersData();
 
         if(selectedMovieDataCursor.getCount() > 0){
             selectedMovieDataCursor.moveToFirst();
@@ -280,6 +311,13 @@ public class DetailActivity extends AppCompatActivity implements
         Cursor trailerCursor=null;
         MovieTrailerResourceAdapter movieTrailerResourceAdapter = null;
 
+        //Initializing MovieTrailerResourceAdapter
+        movieTrailerResourceAdapter = new MovieTrailerResourceAdapter(trailerCursor,this);
+        //Configuring the Resource Switcher RecyclerView.
+        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
+        movieTrailerResourceAdapter.setOnMovieTrailerClikcListener(this);
+
         //Constructing the Uri for fetching the Trailers data for the currently displayed Movie.
         final Uri selectedMovieTrailerDataUri = MovieContract.Trailers.TRAILERS_CONTENT_URI.buildUpon()
                 .appendPath(String.valueOf(currentlyDisplayedMovieTMDBId))
@@ -308,14 +346,7 @@ public class DetailActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
         Log.d(TAG,"No of Trailers: "+trailerCursor.getCount());
-
-        //Initializing MovieTrailerResourceAdapter in case we have got non zero Movie Trailers
-        if(trailerCursor.getCount() > 0){
-            movieTrailerResourceAdapter = new MovieTrailerResourceAdapter(trailerCursor,this);
-        }
-        //Configuring the Resource Switcher RecyclerView.
-        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
+        movieTrailerResourceAdapter.swapCursor(trailerCursor);
     }
 
     /**
@@ -355,19 +386,11 @@ public class DetailActivity extends AppCompatActivity implements
 
         Log.d(TAG,"No of Reviews: "+reviewCursor.getCount());
 
-        if(reviewCursor.getCount() > 0){
-            movieReviewResourceAdapter = new MovieReviewResourceAdapter(reviewCursor,this);
-        }
-
+        movieReviewResourceAdapter = new MovieReviewResourceAdapter(reviewCursor,this);
         //Configuring the Resource Switcher RecyclerView.
         recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
         recyclerView_activity_Detail_resource_switcher.setAdapter(movieReviewResourceAdapter);
     }
-
-
-
-
-
 
 
     /**
@@ -472,7 +495,6 @@ public class DetailActivity extends AppCompatActivity implements
         if(selectedMovieDataCursor.getCount() > 0){
             Log.d(TAG,"Cursor Size: "+selectedMovieDataCursor.getCount());
             selectedMovieDataCursor.moveToFirst();
-            currentlyDisplayedMovieTMDBId = selectedMovieDataCursor.getInt(INDEX_MOVIE_TMDB_ID);
             displayMovieDetails(selectedMovieDataCursor);
         }
         fetchMovieTrailersData();
@@ -609,5 +631,20 @@ public class DetailActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
         return markedAsFavorite;
+    }
+
+    @Override
+    public void onMovieTrailerClick(String movieTrailerYoutubeKey) {
+        Intent youTubeTrailerIntent = new Intent(Intent.ACTION_VIEW
+                , Uri.parse("vnd.youtube://" + movieTrailerYoutubeKey));
+        if(youTubeTrailerIntent.resolveActivity(getPackageManager()) !=null){
+            startActivity(youTubeTrailerIntent);
+        }else {
+            if(popupMessage !=null){
+                popupMessage.cancel();
+            }
+            popupMessage = Toast.makeText(this,getString(R.string.no_package_manager_found),Toast.LENGTH_SHORT);
+            popupMessage.show();
+        }
     }
 }

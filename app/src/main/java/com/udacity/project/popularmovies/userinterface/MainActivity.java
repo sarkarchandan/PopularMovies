@@ -42,20 +42,22 @@ public class MainActivity extends AppCompatActivity
 
     //Constant to be used as key to store the selected tab inside Bundle in order to support the rotation behavior.
     private static final String SELECTED_TAB_INDEX_KEY = "selected-tab-index";
-    private static int selectedTabIndex;
-
-    //Constant that denotes the default selected tab when the app launches.
-    private static final int DEFAULT_SELECTED_TAB = 0;
+    private static int selectedTabIndex = 0;
 
     //String array constant for the projection of data that we need from the database
     private static final String[] MOVIE_GRID_PROJECTION = new String[]{
             MovieContract.Movies._ID,
+            MovieContract.Movies.MOVIE_TMDB_ID,
             MovieContract.Movies.MOVIE_POSTER_URL
     };
 
     //Integer constants that are to be used for retrieving data from the Cursor.
     public static final int INDEX_MOVIE_DB_ID = 0;
-    public static final int INDEX_MOVIE_POSTER_URL = 1;
+    public static final int INDEX_MOVIE_TMDB_ID = 1;
+    public static final int INDEX_MOVIE_POSTER_URL = 2;
+
+    //String Constant to be used as key while putting the movieTMDBId to the explicit Intent
+    public static final String MOVIE_TMDB_ID_INTENT_KEY = "movie-tmdb-intent-key";
 
 
     //String constants to be used as the Selection parameter for movie data
@@ -77,8 +79,6 @@ public class MainActivity extends AppCompatActivity
 
     //Toast reference for making appropriate Toast
     private Toast message;
-    //Bundle reference for selecting the appropriate movie type depending on the circumstances.
-    private Bundle movieDataBundle;
 
 
     @Override
@@ -115,20 +115,23 @@ public class MainActivity extends AppCompatActivity
         //Adding OnTabSelectedListener to the TabLayout
         tabLayout_main_Activity_movieType_switcher.addOnTabSelectedListener(this);
 
-        //Initializing the Bundle
-        movieDataBundle = new Bundle();
+        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
+            selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
+        }
 
         //Handling the app behavior on Create and on rotation.
-        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
-            Log.d(TAG,"Saved Instance state has stored tab: "+savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
-            tabLayout_main_Activity_movieType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
-            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
-            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,movieDataBundle,this);
-        }else {
-            tabLayout_main_Activity_movieType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
-            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,DEFAULT_SELECTED_TAB);
-            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,movieDataBundle,this);
-        }
+//        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
+//            Log.d(TAG,"Saved Instance state has stored tab: "+savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
+//            tabLayout_main_Activity_movieType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
+//            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
+//            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,movieDataBundle,this);
+//        }else {
+//            tabLayout_main_Activity_movieType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
+//            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,DEFAULT_SELECTED_TAB);
+//            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,movieDataBundle,this);
+//        }
+        getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,null,this);
+
     }
 
     /**
@@ -139,18 +142,17 @@ public class MainActivity extends AppCompatActivity
     public void onTabSelected(TabLayout.Tab tab) {
         selectedTabIndex = tab.getPosition();
         Log.d(TAG,"Selected Tab: "+selectedTabIndex);
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
         if(message != null){
             message.cancel();
         }
-        movieDataBundle = new Bundle();
+
         if(selectedTabIndex == 0){
-            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
-            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,movieDataBundle,this);
+            //getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
             message = Toast.makeText(this,getString(R.string.popular_movies),Toast.LENGTH_SHORT);
             message.show();
         }else{
-            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
-            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,movieDataBundle,this);
+            //getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
             message = Toast.makeText(this,getString(R.string.top_rated_movies),Toast.LENGTH_SHORT);
             message.show();
         }
@@ -175,6 +177,12 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
     }
 
     /**
@@ -243,9 +251,8 @@ public class MainActivity extends AppCompatActivity
      * @param movieCursor
      */
     public void loadMovieData(Cursor movieCursor){
-        MovieDataAdapter movieDataAdapter=null;
         recyclerView_movieData.setLayoutManager(new GridLayoutManager(this,calculateNoOfColumns(getBaseContext())));
-           movieDataAdapter = new MovieDataAdapter(movieCursor,this);
+        MovieDataAdapter  movieDataAdapter = new MovieDataAdapter(movieCursor,this);
         recyclerView_movieData.setAdapter(movieDataAdapter);
         movieDataAdapter.setOnMovieCardClickListener(this);
     }
@@ -257,11 +264,12 @@ public class MainActivity extends AppCompatActivity
      * @param position
      */
     @Override
-    public void onMovieCardClick(long position) {
+    public void onMovieCardClick(long position,int movieTMDBId) {
         Uri clickedMovieUri = MovieContract.Movies.MOVIES_CONTENT_URI.buildUpon()
                 .appendPath(String.valueOf(position)).build();
         Intent movieDetailIntent = new Intent(this,DetailActivity.class);
         movieDetailIntent.setData(clickedMovieUri);
+        movieDetailIntent.putExtra(MOVIE_TMDB_ID_INTENT_KEY,movieTMDBId);
         startActivity(movieDetailIntent);
     }
 
@@ -273,28 +281,29 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public Loader<Cursor> onCreateLoader(int loaderId, Bundle selectedTabBundle) {
+        Log.d(TAG,"onCreateLoaderCalled");
         showProgress();
         switch (loaderId){
             case MOVIE_LOADER_ID:
                 Uri movieDataUri = MovieContract.Movies.MOVIES_CONTENT_URI;
-                if(selectedTabBundle.containsKey(SELECTED_TAB_INDEX_KEY)){
-                    if(selectedTabBundle.getInt(SELECTED_TAB_INDEX_KEY) == 0){
-                        //Loading Popular Movie Data
-                        return new CursorLoader(this
-                                ,movieDataUri
-                                ,MOVIE_GRID_PROJECTION
-                                ,MOVIE_SELECTION
-                                ,POPULAR_MOVIE_SELECTION_ARGS
-                                ,MovieContract.Movies.MOVIE_RATING);
-                    }else {
-                        //Loading Top-Rated Movie Data
-                        return new CursorLoader(this
-                                ,movieDataUri
-                                ,MOVIE_GRID_PROJECTION
-                                ,MOVIE_SELECTION
-                                ,TOP_RATED_MOVIE_SELECTION_ARGS
-                                ,MovieContract.Movies.MOVIE_RATING);
-                    }
+                if(selectedTabIndex == 0){
+                    Log.d(TAG,"POPULAR CursorLoader Chosen");
+                    //Loading Popular Movie Data
+                    return new CursorLoader(this
+                            ,movieDataUri
+                            ,MOVIE_GRID_PROJECTION
+                            ,MOVIE_SELECTION
+                            ,POPULAR_MOVIE_SELECTION_ARGS
+                            ,MovieContract.Movies.MOVIE_RATING);
+                }else {
+                    Log.d(TAG,"TOP_RATED CursorLoader Chosen");
+                    //Loading Top-Rated Movie Data
+                    return new CursorLoader(this
+                            ,movieDataUri
+                            ,MOVIE_GRID_PROJECTION
+                            ,MOVIE_SELECTION
+                            ,TOP_RATED_MOVIE_SELECTION_ARGS
+                            ,MovieContract.Movies.MOVIE_RATING);
                 }
             default:
                 throw new RuntimeException("Loader not implemented: "+loaderId);
@@ -308,11 +317,11 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        while (data.getCount() ==0){
-            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
-        }
+        Log.d(TAG,"onLoadFinishedCalled with Cursor Data Count: "+data.getCount());
         loadMovieData(data);
-        showData();
+        if(data.getCount() > 0){
+            showData();
+        }
     }
 
     @Override

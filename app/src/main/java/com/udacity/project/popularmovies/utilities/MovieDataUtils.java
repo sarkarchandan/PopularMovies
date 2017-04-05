@@ -8,12 +8,14 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.udacity.project.popularmovies.BuildConfig;
+import com.udacity.project.popularmovies.model.Movie;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -132,8 +134,10 @@ public class MovieDataUtils {
      * @return String // JSON data related to the chosen category of movies
      * @throws IOException
      */
-    public static String fetchMovieDataFromHttpUrl(URL movieDataUrl) throws IOException {
+    public static synchronized String fetchMovieDataFromHttpUrl(URL movieDataUrl) throws IOException {
         HttpURLConnection httpURLConnection = (HttpURLConnection) movieDataUrl.openConnection();
+        httpURLConnection.setRequestMethod("GET");
+        httpURLConnection.connect();
         try{
             InputStream inputStream = httpURLConnection.getInputStream();
             Scanner scanner = new Scanner(inputStream);
@@ -147,6 +151,27 @@ public class MovieDataUtils {
         }finally {
             httpURLConnection.disconnect();
         }
+    }
+
+    /**
+     * Method validateMovieData validates if the collection of Movie instance is valid
+     * @param movieList //List of Novie instances obtained from the processRawMovieData method.
+     * @return boolean // returns boolean expression based on the validity of the collection of movie data
+     */
+    public static boolean validateMovieData(List<Movie> movieList) {
+        boolean validMovieInstance = false;
+        if (movieList != null) {
+            for (Movie movie : movieList) {
+                if (movie instanceof Movie && movie.getMovieOriginalTitle() != null) {
+                    validMovieInstance = true;
+                } else {
+                    validMovieInstance = false;
+                }
+            }
+        } else {
+            validMovieInstance = false;
+        }
+        return validMovieInstance;
     }
 
     /**

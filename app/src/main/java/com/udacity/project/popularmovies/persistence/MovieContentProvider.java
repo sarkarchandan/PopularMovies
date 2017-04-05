@@ -13,6 +13,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.udacity.project.popularmovies.model.Movie;
+
 /**
  * Defining the native ContentProvider for this app.
  * Created by chandan on 31.03.17.
@@ -29,9 +31,13 @@ public class MovieContentProvider extends ContentProvider {
 
     private static final int TRAILERS = 200;
     private static final int TRAILER_WITH_MOVIE_ID = 201;
+    private static final int TRAILERS_WITH_TMDB_ID = 202;
 
     private static final int REVIEWS = 300;
     private static final int REVIEW_WITH_MOVIE_ID = 301;
+    private static final int REVIEW_WITH_TMDB_ID = 302;
+
+    //TODO Add approrpiate options here 
 
     //Initializing the UriMatcher
     public static final UriMatcher sUriMatcher = buildUriMatcher();
@@ -48,8 +54,10 @@ public class MovieContentProvider extends ContentProvider {
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_MOVIES+"/*",MOVIE_WITH_TITLE);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS,REVIEWS);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS+"/#",REVIEW_WITH_MOVIE_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_REVIEWS+"/*",REVIEW_WITH_TMDB_ID);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS,TRAILERS);
         uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS+"/#",TRAILER_WITH_MOVIE_ID);
+        uriMatcher.addURI(MovieContract.CONTENT_AUTHORITY,MovieContract.PATH_TRAILERS+"/*",TRAILERS_WITH_TMDB_ID);
         return uriMatcher;
     }
 
@@ -131,6 +139,17 @@ public class MovieContentProvider extends ContentProvider {
                 ,null
                 ,sortOrder);
                 break;
+            case TRAILERS_WITH_TMDB_ID:
+                String myTrailerWithTMDBIdSelection = MovieContract.Trailers.TRAILER_TMDB_ID+" =?";
+                String[] myTrailerWithTMDBIdSelectionArgs = new String[]{uri.getPathSegments().get(1)};
+                returnCursor = sqLiteDatabase.query(MovieContract.Trailers.TRAILER_TABLE_NAME
+                ,projection
+                ,myTrailerWithTMDBIdSelection
+                ,myTrailerWithTMDBIdSelectionArgs
+                ,null
+                ,null
+                ,null);
+                break;
             case REVIEWS:
                 returnCursor = sqLiteDatabase.query(MovieContract.Reviews.REVIEW_TABLE_NAME
                 ,projection
@@ -150,6 +169,17 @@ public class MovieContentProvider extends ContentProvider {
                 ,null
                 ,null
                 ,sortOrder);
+                break;
+            case REVIEW_WITH_TMDB_ID:
+                String myReviewWithTMDBIdSelection = MovieContract.Reviews.REVIEW_TMDB_ID+" =?";
+                String[] myReviewWithTMDBIdSelectionArgs = new String[]{uri.getPathSegments().get(1)};
+                returnCursor = sqLiteDatabase.query(MovieContract.Reviews.REVIEW_TABLE_NAME
+                ,projection
+                ,myReviewWithTMDBIdSelection
+                ,myReviewWithTMDBIdSelectionArgs
+                ,null
+                ,null
+                ,null);
                 break;
             default:
                 throw new UnsupportedOperationException("An Error Occurred while querying with the Uri: "+uri);

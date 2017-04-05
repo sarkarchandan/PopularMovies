@@ -10,19 +10,16 @@ import android.os.Parcelable;
 public class MovieTrailer implements Parcelable{
     private String movieTrailerTMDBId;
     private String movieTrailerKey;
-    private String movieTrailerURL;
 
 
-    public MovieTrailer(String movieTrailerTMDBId, String movieTrailerKey, String movieTrailerURL) {
+    public MovieTrailer(String movieTrailerTMDBId, String movieTrailerKey) {
         this.movieTrailerTMDBId = movieTrailerTMDBId;
         this.movieTrailerKey = movieTrailerKey;
-        this.movieTrailerURL = movieTrailerURL;
     }
 
     private MovieTrailer(Parcel parcel){
         movieTrailerTMDBId = parcel.readString();
         movieTrailerKey = parcel.readString();
-        movieTrailerURL = parcel.readString();
     }
 
     public String getMovieTrailerTMDBId() {
@@ -41,14 +38,6 @@ public class MovieTrailer implements Parcelable{
         this.movieTrailerKey = movieTrailerKey;
     }
 
-    public String getMovieTrailerURL() {
-        return movieTrailerURL;
-    }
-
-    public void setMovieTrailerURL(String movieTrailerURL) {
-        this.movieTrailerURL = movieTrailerURL;
-    }
-
     @Override
     public int describeContents() {
         return 0;
@@ -58,7 +47,6 @@ public class MovieTrailer implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(movieTrailerTMDBId);
         parcel.writeString(movieTrailerKey);
-        parcel.writeString(movieTrailerURL);
     }
 
     public static final Creator<MovieTrailer> CREATOR = new Parcelable.Creator<MovieTrailer>(){

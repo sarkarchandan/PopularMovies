@@ -16,6 +16,7 @@
     <string name="author_says">says</string>
     <string name="say_sorry">Sorry !!!</string>
     <string name="no_review_available">No Review Available for This Movie</string>
+    <string name="no_package_manager_found">No Appropriate App Found</string>
 
     <!--String resources for the menu items-->
     <string name="favorite_movies">Favorites</string>
