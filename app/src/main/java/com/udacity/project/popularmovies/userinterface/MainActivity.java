@@ -42,7 +42,6 @@ public class MainActivity extends AppCompatActivity
 
     //Constant to be used as key to store the selected tab inside Bundle in order to support the rotation behavior.
     private static final String SELECTED_TAB_INDEX_KEY = "selected-tab-index";
-    private static int selectedTabIndex = 0;
 
     //String array constant for the projection of data that we need from the database
     private static final String[] MOVIE_GRID_PROJECTION = new String[]{
@@ -115,21 +114,15 @@ public class MainActivity extends AppCompatActivity
         //Adding OnTabSelectedListener to the TabLayout
         tabLayout_main_Activity_movieType_switcher.addOnTabSelectedListener(this);
 
-        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
-            selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
+        if(savedInstanceState !=null){
+            if(savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
+                int position = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
+                tabLayout_main_Activity_movieType_switcher.getTabAt(position).select();
+            }
+        }else {
+            tabLayout_main_Activity_movieType_switcher.getTabAt(0).select();
         }
 
-        //Handling the app behavior on Create and on rotation.
-//        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
-//            Log.d(TAG,"Saved Instance state has stored tab: "+savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
-//            tabLayout_main_Activity_movieType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
-//            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY));
-//            getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,movieDataBundle,this);
-//        }else {
-//            tabLayout_main_Activity_movieType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
-//            movieDataBundle.putInt(SELECTED_TAB_INDEX_KEY,DEFAULT_SELECTED_TAB);
-//            getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,movieDataBundle,this);
-//        }
         getSupportLoaderManager().initLoader(MOVIE_LOADER_ID,null,this);
 
     }
@@ -140,19 +133,16 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        selectedTabIndex = tab.getPosition();
-        Log.d(TAG,"Selected Tab: "+selectedTabIndex);
+        Log.d(TAG,"Selected Tab: "+tab.getPosition());
         getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
         if(message != null){
             message.cancel();
         }
 
-        if(selectedTabIndex == 0){
-            //getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
+        if(tab.getPosition() == 0){
             message = Toast.makeText(this,getString(R.string.popular_movies),Toast.LENGTH_SHORT);
             message.show();
         }else{
-            //getSupportLoaderManager().restartLoader(MOVIE_LOADER_ID,null,this);
             message = Toast.makeText(this,getString(R.string.top_rated_movies),Toast.LENGTH_SHORT);
             message.show();
         }
@@ -176,7 +166,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
+        outState.putInt(SELECTED_TAB_INDEX_KEY,tabLayout_main_Activity_movieType_switcher.getSelectedTabPosition());
     }
 
     @Override
@@ -286,7 +276,7 @@ public class MainActivity extends AppCompatActivity
         switch (loaderId){
             case MOVIE_LOADER_ID:
                 Uri movieDataUri = MovieContract.Movies.MOVIES_CONTENT_URI;
-                if(selectedTabIndex == 0){
+                if(tabLayout_main_Activity_movieType_switcher.getSelectedTabPosition() == 0){
                     Log.d(TAG,"POPULAR CursorLoader Chosen");
                     //Loading Popular Movie Data
                     return new CursorLoader(this

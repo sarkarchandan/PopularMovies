@@ -128,53 +128,6 @@ public class MovieDataUtils {
     }
 
     /**
-     * Method fetchMovieDataFromHttpUrl is responsible to send an HTTP URL request to the movie database api and fetch the
-     * movie related data as JSON objects.
-     * @param movieDataUrl // URL constructed by the method buildPopularMovieDataRequestURL based upon the chosen category
-     * @return String // JSON data related to the chosen category of movies
-     * @throws IOException
-     */
-    public static synchronized String fetchMovieDataFromHttpUrl(URL movieDataUrl) throws IOException {
-        HttpURLConnection httpURLConnection = (HttpURLConnection) movieDataUrl.openConnection();
-        httpURLConnection.setRequestMethod("GET");
-        httpURLConnection.connect();
-        try{
-            InputStream inputStream = httpURLConnection.getInputStream();
-            Scanner scanner = new Scanner(inputStream);
-            scanner.useDelimiter("\\A");
-            boolean hasInput = scanner.hasNext();
-            if(hasInput){
-                return scanner.next();
-            }else{
-                return null;
-            }
-        }finally {
-            httpURLConnection.disconnect();
-        }
-    }
-
-    /**
-     * Method validateMovieData validates if the collection of Movie instance is valid
-     * @param movieList //List of Novie instances obtained from the processRawMovieData method.
-     * @return boolean // returns boolean expression based on the validity of the collection of movie data
-     */
-    public static boolean validateMovieData(List<Movie> movieList) {
-        boolean validMovieInstance = false;
-        if (movieList != null) {
-            for (Movie movie : movieList) {
-                if (movie instanceof Movie && movie.getMovieOriginalTitle() != null) {
-                    validMovieInstance = true;
-                } else {
-                    validMovieInstance = false;
-                }
-            }
-        } else {
-            validMovieInstance = false;
-        }
-        return validMovieInstance;
-    }
-
-    /**
      * Method checkConnectivityStatus checks the connectivity status of the device and helps the app to act reasonably.
      * We don' want our app to crash when the NetworkConnectivity is not available.
      * @param context //Context of the Activity class that checks the Connection status.

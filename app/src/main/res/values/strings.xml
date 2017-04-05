@@ -27,4 +27,6 @@
     <!--String resources for the Notification-->
     <string name="notification_title">New Movie Data Available</string>
     <string name="notification_body">We have exciting new Movie data available for you. How about checking out now !!!</string>
+
+
 </resources>

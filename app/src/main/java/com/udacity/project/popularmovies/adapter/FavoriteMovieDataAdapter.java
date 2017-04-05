@@ -9,17 +9,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-
 import com.squareup.picasso.Picasso;
 import com.udacity.project.popularmovies.R;
 import com.udacity.project.popularmovies.userinterface.FavoriteActivity;
-import com.udacity.project.popularmovies.utilities.MovieDataUtils;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Adapter class for the RecyclerView in the FavoriteActivity
+ * Adapter class for the RecyclerView in the FavoriteActivity to help display the the FavoriteMovies and swipe them out when they are
+ * not so favorite.
  * Created by chandan on 02.04.17.
  */
 public class FavoriteMovieDataAdapter extends RecyclerView.Adapter<FavoriteMovieDataAdapter.FavoriteMoviesViewHolder>{

@@ -3,4 +3,6 @@
     <integer name="movie_poster_number_in_a_row">3</integer>
     <integer name="value_of_favorite_movie">1</integer>
     <integer name="value_of_non_favorite_movie">0</integer>
+
+    <integer name="COMMON_DEFAULT_ZERO_VALUE">0</integer>
 </resources>

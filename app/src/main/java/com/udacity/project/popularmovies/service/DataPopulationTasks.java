@@ -23,7 +23,7 @@ import org.json.JSONObject;
 import java.net.URL;
 
 /**
- * Defines the tasks that must be performed by the Service in the background
+ * Defines the tasks that must be performed by the Service in the background.
  * Created by chandan on 01.04.17.
  */
 public class DataPopulationTasks {
@@ -127,10 +127,12 @@ public class DataPopulationTasks {
         //Getting the ContentResolver instance
         ContentResolver contentResolver = context.getContentResolver();
 
+        //Defining Uri to check if a given trailer in existing
         Uri isExistingTrailerUri = MovieContract.Trailers.TRAILERS_CONTENT_URI.buildUpon()
                 .appendPath(movieTMDBTrailerID)
                 .build();
 
+        //Defining minimal projection
         String[] EXISTING_TRAILER_MINIMAL_PROJECTION = new String[]{
                 MovieContract.Trailers.MOVIE_TRAILER_YOUTUBE_KEY};
 
@@ -156,6 +158,7 @@ public class DataPopulationTasks {
         //Getting the ContentResolver instance
         ContentResolver contentResolver = context.getContentResolver();
 
+        //Defining Uri to check if a given Review is existing
         Uri isExistingReviewUri = MovieContract.Reviews.REVIEWS_CONTENT_URI.buildUpon()
                 .appendPath(movieTMDBReviewId)
                 .build();
@@ -226,6 +229,7 @@ public class DataPopulationTasks {
                                 , moviePlotSynopsis
                                 , movieRating
                                 , movieReleaseDate) instanceof Movie){
+
                             //Initializing and wrapping the ContentValues for inserting to movies directory
                             ContentValues movieContentValues = new ContentValues();
                             movieContentValues.put(MovieContract.Movies.MOVIE_TMDB_ID,movieTMDBId);
@@ -318,8 +322,11 @@ public class DataPopulationTasks {
         //Getting the ContentResolver instance
         final ContentResolver contentResolver = context.getContentResolver();
 
+        //Constructing the appropriate resource URL (either trailer or review) depending on the passed in resourceType for a
+        //particular movie with passed in movieTMDBId;
         movieSpecificResourceURL = MovieDataUtils.buildMovieSpecificResourceRequestURL(movieTMDBId,resourceType);
 
+        //Defining JsonObjectRequest to TMDB Api with the help of Volley
         JsonObjectRequest movieResourceJsonObjectRequest = new JsonObjectRequest(Request.Method.GET
                 , movieSpecificResourceURL.toString()
                 , null
@@ -337,6 +344,7 @@ public class DataPopulationTasks {
                                 String trailerTMDBId = movieVideoObject.getString(VIDEO_TMDB_ID);
                                 String TRAILER_YOUTUBE_KEY = movieVideoObject.getString(VIDEO_KEY);
 
+                                //Only persist the trailer if it is not pre-existing
                                 if(new MovieTrailer(trailerTMDBId,TRAILER_YOUTUBE_KEY) instanceof MovieTrailer && !isExistingTrailer(context,trailerTMDBId)){
                                     ContentValues trailerContentValues = new ContentValues();
                                     trailerContentValues.put(MovieContract.Trailers.TRAILER_TMDB_ID,trailerTMDBId);
@@ -360,6 +368,7 @@ public class DataPopulationTasks {
                             String reviewAuthor = movieReviewObject.getString(REVIEW_AUTHOR);
                             String reviewContent = movieReviewObject.getString(REVIEW_CONTENT);
 
+                            //Only persist the review is it is not pre-existing
                             if(new MovieReview(reviewTMDBId,reviewAuthor,reviewContent) instanceof MovieReview && !isExistingReview(context,reviewTMDBId)){
                                 ContentValues reviewsContentValues = new ContentValues();
                                 reviewsContentValues.put(MovieContract.Reviews.REVIEW_TMDB_ID,reviewTMDBId);
@@ -404,10 +413,13 @@ public class DataPopulationTasks {
         //Service will only be executed in case there is a connectivity. Otherwise it might result into stale data.
         if(MovieDataUtils.checkConnectionStatusInBackground(context)){
             switch (action){
+                //For the generic information of the Movie to be triggered by MainActivity as an IntentService and by FirebaseJobDispatcher as
+                //a JobService
                 case ACTION_POPULATE_MOVIE_DATA:
                     populateMoviesData(context);
                     Log.d(TAG,"DataPopulationService Executed for populating the Movie Generic Data");
                     break;
+                //To be triggered by DetailActivity as an IntentService for each Movie
                 case ACTION_POPULATE_MOVIE_RESOURCES:
                     Log.d(TAG,"The Movie Id Values received: "+movieTMDBId);
                     if(movieTMDBId != DetailActivity.MOVIE_ID_DEFAULT_VALUE){

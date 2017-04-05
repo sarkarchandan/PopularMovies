@@ -6,6 +6,6 @@
     android:background="@drawable/drawable_translucent"
     app:navigationIcon="?homeAsUpIndicator"
     app:theme="@style/ActionBarThemeOverlay"
-    android:elevation="20dp">
+    android:elevation="@dimen/common_elevation_dimen">
 
 </android.support.v7.widget.Toolbar>

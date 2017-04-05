@@ -87,10 +87,6 @@ public class DetailActivity extends AppCompatActivity implements
 
     //Constant to be used as key to store the selected tab inside Bundle in order to support the rotation behavior.
     private static final String SELECTED_TAB_INDEX_KEY = "selected-tab-index";
-    private static int selectedTabIndex = 0;
-
-    //Constant that denotes the default selected tab when the app launches.
-    private static final int DEFAULT_SELECTED_TAB = 0;
 
     //Identifier for the CursorLoader for General Movie Data
     private static final int DISPLAY_SELECTED_MOVIE_DATA_LOADER_ID = 3018;
@@ -140,6 +136,8 @@ public class DetailActivity extends AppCompatActivity implements
     private static Uri selectedMovieDataUri;
     private static int currentlyDisplayedMovieTMDBId;
     private Toast popupMessage;
+    private MovieTrailerResourceAdapter movieTrailerResourceAdapter = null;
+    private MovieReviewResourceAdapter movieReviewResourceAdapter = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,15 +184,14 @@ public class DetailActivity extends AppCompatActivity implements
         tabLayout_detail_Activity_resourceType_switcher.addOnTabSelectedListener(this);
 
         //Handling the app behavior on Create and on rotation.
-        if(savedInstanceState !=null && savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
-            selectedTabIndex = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
+        if(savedInstanceState !=null){
+            if(savedInstanceState.containsKey(SELECTED_TAB_INDEX_KEY)){
+                int position = savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY);
+                tabLayout_detail_Activity_resourceType_switcher.getTabAt(position).select();
+            }
+        }else {
+            tabLayout_detail_Activity_resourceType_switcher.getTabAt(0).select();
         }
-        //tabLayout_detail_Activity_resourceType_switcher.getTabAt(selectedTabIndex).select();
-//        if(savedInstanceState == null){
-//            tabLayout_detail_Activity_resourceType_switcher.getTabAt(DEFAULT_SELECTED_TAB).select();
-//        }else {
-//            tabLayout_detail_Activity_resourceType_switcher.getTabAt(savedInstanceState.getInt(SELECTED_TAB_INDEX_KEY)).select();
-//        }
         fetchMovieTrailersData();
     }
 
@@ -205,11 +202,10 @@ public class DetailActivity extends AppCompatActivity implements
      */
     @Override
     public void onTabSelected(TabLayout.Tab tab) {
-        selectedTabIndex = tab.getPosition();
 
-        Log.d(TAG,"Currently Selected Tab: "+selectedTabIndex);
+        Log.d(TAG,"Currently Selected Tab: "+tab.getPosition());
 
-        if(selectedTabIndex == 0){
+        if(tab.getPosition() == 0){
             fetchMovieTrailersData();
         }else{
             fetchMovieReviewData();
@@ -220,7 +216,6 @@ public class DetailActivity extends AppCompatActivity implements
     public void onTabUnselected(TabLayout.Tab tab) {
 
     }
-
     @Override
     public void onTabReselected(TabLayout.Tab tab) {
 
@@ -234,7 +229,7 @@ public class DetailActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(SELECTED_TAB_INDEX_KEY,selectedTabIndex);
+        outState.putInt(SELECTED_TAB_INDEX_KEY,tabLayout_detail_Activity_resourceType_switcher.getSelectedTabPosition());
     }
 
     /**
@@ -247,8 +242,13 @@ public class DetailActivity extends AppCompatActivity implements
     protected void onStart() {
         super.onStart();
         Log.d(TAG,"onStart called");
-        tabLayout_detail_Activity_resourceType_switcher.getTabAt(selectedTabIndex).select();
+        if(tabLayout_detail_Activity_resourceType_switcher.getTabAt(0).isSelected()){
+            fetchMovieTrailersData();
+        }else {
+            fetchMovieReviewData();
+        }
     }
+
 
     /**
      * This method displays the data about a Movie in the ui and
@@ -309,14 +309,6 @@ public class DetailActivity extends AppCompatActivity implements
     public void fetchMovieTrailersData(){
 
         Cursor trailerCursor=null;
-        MovieTrailerResourceAdapter movieTrailerResourceAdapter = null;
-
-        //Initializing MovieTrailerResourceAdapter
-        movieTrailerResourceAdapter = new MovieTrailerResourceAdapter(trailerCursor,this);
-        //Configuring the Resource Switcher RecyclerView.
-        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
-        movieTrailerResourceAdapter.setOnMovieTrailerClikcListener(this);
 
         //Constructing the Uri for fetching the Trailers data for the currently displayed Movie.
         final Uri selectedMovieTrailerDataUri = MovieContract.Trailers.TRAILERS_CONTENT_URI.buildUpon()
@@ -346,7 +338,15 @@ public class DetailActivity extends AppCompatActivity implements
             e.printStackTrace();
         }
         Log.d(TAG,"No of Trailers: "+trailerCursor.getCount());
-        movieTrailerResourceAdapter.swapCursor(trailerCursor);
+
+        //Initializing MovieTrailerResourceAdapter
+        movieTrailerResourceAdapter = new MovieTrailerResourceAdapter(trailerCursor,this);
+
+        //Configuring the Resource Switcher RecyclerView.
+        recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
+        movieTrailerResourceAdapter.setOnMovieTrailerClikcListener(this);
+
     }
 
     /**
@@ -355,7 +355,6 @@ public class DetailActivity extends AppCompatActivity implements
     public void fetchMovieReviewData(){
 
         Cursor reviewCursor = null;
-        MovieReviewResourceAdapter movieReviewResourceAdapter = null;
 
         //Constructing the Uri for fetching the Reviews data for the currently displayed Movie.
         final Uri movieReviewDataUri = MovieContract.Reviews.REVIEWS_CONTENT_URI.buildUpon()
@@ -383,7 +382,6 @@ public class DetailActivity extends AppCompatActivity implements
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
-
         Log.d(TAG,"No of Reviews: "+reviewCursor.getCount());
 
         movieReviewResourceAdapter = new MovieReviewResourceAdapter(reviewCursor,this);
@@ -497,7 +495,6 @@ public class DetailActivity extends AppCompatActivity implements
             selectedMovieDataCursor.moveToFirst();
             displayMovieDetails(selectedMovieDataCursor);
         }
-        fetchMovieTrailersData();
         showData();
     }
 

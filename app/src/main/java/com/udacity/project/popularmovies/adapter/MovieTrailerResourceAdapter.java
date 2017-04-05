@@ -53,16 +53,6 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
         return new MovieTrailerItemViewHolder(view);
     }
 
-    /**
-     * Replaces the existing Cursor with a new Cursor.
-     * @param newCursor
-     */
-    public void swapCursor(Cursor newCursor){
-        if(newCursor != null){
-            movieTrailerCursor = newCursor;
-        }
-        notifyDataSetChanged();
-    }
 
     @Override
     public void onBindViewHolder(MovieTrailerItemViewHolder holder, int position) {

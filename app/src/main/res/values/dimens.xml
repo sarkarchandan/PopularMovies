@@ -5,7 +5,16 @@
     <dimen name="imageView_detailActivity_backdrop_height">270dp</dimen>
     <dimen name="textView_detailActivity_originalTitle_width">259dp</dimen>
     <dimen name="textView_detailActivity_originalTitle_height">39dp</dimen>
-    <dimen name="cardView_activityDetails_width">120dp</dimen>
+    <dimen name="cardView_activityDetail_width">120dp</dimen>
     <dimen name="cardView_activityDetail_height">170dp</dimen>
     <dimen name="cardView_activityFavorite_height">200dp</dimen>
+    <dimen name="cardView_activityDetail_marginTop">207dp</dimen>
+
+    <dimen name="common_margin_dimen">8dp</dimen>
+    <dimen name="common_elevation_dimen">20dp</dimen>
+    <dimen name="common_card_elevation_dimen">8dp</dimen>
+    <dimen name="common_card_layout_margin">2dp</dimen>
+
+    <dimen name="progressBar_height">48dp</dimen>
+    <dimen name="progressBar_width">48dp</dimen>
 </resources>

@@ -3,8 +3,8 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="@dimen/cardView_activityFavorite_height"
-    android:layout_margin="2dp"
-    android:elevation="8dp"
+    android:layout_margin="@dimen/common_card_layout_margin"
+    android:elevation="@dimen/common_card_elevation_dimen"
     android:id="@+id/card_view_favorite_activity_movie_poster">
 
     <ImageView
