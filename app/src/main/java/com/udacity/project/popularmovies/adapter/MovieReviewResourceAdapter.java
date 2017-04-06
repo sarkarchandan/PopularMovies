@@ -29,7 +29,14 @@ public class MovieReviewResourceAdapter extends RecyclerView.Adapter<MovieReview
         this.context = context;
     }
 
-
+    /**
+     * Overridden method onCreateViewHolder inflates the layout for the items to be displayed by the RecyclerView.
+     * We will create number of items once and recycle them using the onBindViewHolder method. This method returns
+     * a number of ViewHolder instances.
+     * @param parent // reference of the ViewGroup
+     * @param viewType // Type of the View
+     * @return ViewHolder instances.
+     */
     @Override
     public MovieReviewItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -39,6 +46,12 @@ public class MovieReviewResourceAdapter extends RecyclerView.Adapter<MovieReview
         return new MovieReviewItemViewHolder(view);
     }
 
+    /**
+     * Overridden method onBindViewHolder binds each of the items to be displayed using the RecyclerView with data and
+     * upon recycling ViewHolder instances this method also binds them with new data.
+     * @param holder // instance of the ViewHolder to be bound with data
+     * @param position //position of the ViewHolder instance in the collection of data being displayed by the RecyclerView
+     */
     @Override
     public void onBindViewHolder(MovieReviewItemViewHolder holder, int position) {
         movieReviewCursor.moveToPosition(position);
@@ -56,6 +69,10 @@ public class MovieReviewResourceAdapter extends RecyclerView.Adapter<MovieReview
 
     }
 
+    /**
+     * Returns the displayable ItemCount of the data source
+     * @return // Integer
+     */
     @Override
     public int getItemCount() {
         return movieReviewCursor.getCount();

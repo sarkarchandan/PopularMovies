@@ -6,7 +6,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 
 /**
- * MovieDBHelper is the Helper class for the data persistence
+ * MovieDBHelper is the Helper class for the data persistence. This class defines the schema for our database tables
+ * and defines the DDL operations scheme.
  * Created by chandan on 31.03.17.
  */
 public class MovieDBHelper extends SQLiteOpenHelper {
@@ -21,7 +22,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Creates the schemas for persisting data.
+     * Creates and executes the DDL schemas for the database that are required for persisting data.
      * @param sqLiteDatabase
      */
     @Override
@@ -68,7 +69,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
     }
 
     /**
-     * Modifies the database schemas
+     * Modifies the database schemas if required
      * @param sqLiteDatabase
      * @param i
      * @param i1

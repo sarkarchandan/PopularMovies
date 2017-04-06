@@ -5,7 +5,8 @@ import android.net.wifi.ScanResult;
 import android.provider.BaseColumns;
 
 /**
- * Contract for the data persistence
+ * Contract for the data persistence. This class will encapsulate the fundamental fields of our database tables
+ * amd also contains the Uri we need to access the data from the database.
  * Created by chandan on 31.03.17.
  */
 public final class MovieContract {

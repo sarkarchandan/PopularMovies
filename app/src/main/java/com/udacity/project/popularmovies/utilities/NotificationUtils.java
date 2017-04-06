@@ -45,7 +45,7 @@ public class NotificationUtils {
      * @param context
      * @return
      */
-    private static Bitmap createlargeIconBitmap(Context context){
+    private static Bitmap createLargeIconBitmap(Context context){
         Resources resources = context.getResources();
         Bitmap bitmap = BitmapFactory.decodeResource(resources, R.drawable.tmdb_notification_logo_green);
         return bitmap;
@@ -60,7 +60,7 @@ public class NotificationUtils {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(context)
                 .setColor(ContextCompat.getColor(context,R.color.colorPrimary))
                 .setSmallIcon(R.drawable.placeholder_small_stacked_blue)
-                .setLargeIcon(createlargeIconBitmap(context))
+                .setLargeIcon(createLargeIconBitmap(context))
                 .setContentTitle(context.getString(R.string.notification_title))
                 .setContentText(context.getString(R.string.notification_body))
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(context.getString(R.string.notification_body)))

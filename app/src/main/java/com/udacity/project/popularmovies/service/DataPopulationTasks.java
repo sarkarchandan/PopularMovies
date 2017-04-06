@@ -24,6 +24,7 @@ import java.net.URL;
 
 /**
  * Defines the tasks that must be performed by the Service in the background.
+ * This tasks include contacting the API source and fetch data, process data and persist data conditionally.
  * Created by chandan on 01.04.17.
  */
 public class DataPopulationTasks {

@@ -44,6 +44,14 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
         this.onMovieTrailerClikcListener = onMovieTrailerClikcListener;
     }
 
+    /**
+     * Overridden method onCreateViewHolder inflates the layout for the items to be displayed by the RecyclerView.
+     * We will create number of items once and recycle them using the onBindViewHolder method. This method returns
+     * a number of ViewHolder instances.
+     * @param parent // reference of the ViewGroup
+     * @param viewType // Type of the View
+     * @return ViewHolder instances.
+     */
     @Override
     public MovieTrailerItemViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(context);
@@ -54,6 +62,12 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
     }
 
 
+    /**
+     * Overridden method onBindViewHolder binds each of the items to be displayed using the RecyclerView with data and
+     * upon recycling ViewHolder instances this method also binds them with new data.
+     * @param holder // instance of the ViewHolder to be bound with data
+     * @param position //position of the ViewHolder instance in the collection of data being displayed by the RecyclerView
+     */
     @Override
     public void onBindViewHolder(MovieTrailerItemViewHolder holder, int position) {
         movieTrailerCursor.moveToPosition(position);
@@ -73,6 +87,10 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
                 .into(holder.imageView_movie_trailer_thumbnail);
     }
 
+    /**
+     * Returns the displayable ItemCount of the data source
+     * @return // Integer
+     */
     @Override
     public int getItemCount() {
         return movieTrailerCursor.getCount();
