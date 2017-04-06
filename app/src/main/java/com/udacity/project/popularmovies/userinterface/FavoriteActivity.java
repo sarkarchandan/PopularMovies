@@ -32,12 +32,14 @@ public class FavoriteActivity extends AppCompatActivity implements
     //Defining minimal projection for the Favorite movie poster URL
     public static final String[] FAVORITE_MOVIE_MINIMAL_PROJECTION = new String[]{
             MovieContract.Movies._ID,
+            MovieContract.Movies.MOVIE_TMDB_ID,
             MovieContract.Movies.MOVIE_POSTER_URL
     };
 
     //Defining the Cursor index based on minimal projection
     public static final int INDEX_FAVORITE_MOVIE_ID = 0;
-    public static final int INDEX_FAVORITE_MOVIE_POSTER_URL = 1;
+    public static final int INDEX_FAVORITE_MOVIE_TMDB_ID = 1;
+    public static final int INDEX_FAVORITE_MOVIE_POSTER_URL = 2;
 
     //Defining Favorite Movies Content Uri
     private static final Uri FAVORITE_MOVIE_CONTENT_URI = MovieContract.Movies.MOVIES_CONTENT_URI;
@@ -171,11 +173,12 @@ public class FavoriteActivity extends AppCompatActivity implements
      * @param favoriteMovieId
      */
     @Override
-    public void onFavoriteMovieClick(long favoriteMovieId) {
+    public void onFavoriteMovieClick(long favoriteMovieId,int favoriteMovieTMDBId) {
         Uri favoriteMovieDetailUri = MovieContract.Movies.MOVIES_CONTENT_URI.buildUpon()
                 .appendPath(String.valueOf(favoriteMovieId)).build();
         Intent favoriteMovieDetailIntent = new Intent(this,DetailActivity.class);
         favoriteMovieDetailIntent.setData(favoriteMovieDetailUri);
+        favoriteMovieDetailIntent.putExtra(MainActivity.MOVIE_TMDB_ID_INTENT_KEY,favoriteMovieTMDBId);
         startActivity(favoriteMovieDetailIntent);
     }
 }

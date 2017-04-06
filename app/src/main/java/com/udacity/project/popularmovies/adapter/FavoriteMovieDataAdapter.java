@@ -32,7 +32,7 @@ public class FavoriteMovieDataAdapter extends RecyclerView.Adapter<FavoriteMovie
     }
 
     public interface OnFavoriteMovieClickListener{
-        public void onFavoriteMovieClick(long favoriteMovieId);
+        public void onFavoriteMovieClick(long favoriteMovieId,int favoriteMovieTMDBId);
     }
 
     public void setOnFavoriteMovieClickListener(OnFavoriteMovieClickListener onFavoriteMovieClickListener) {
@@ -105,7 +105,9 @@ public class FavoriteMovieDataAdapter extends RecyclerView.Adapter<FavoriteMovie
         @Override
         public void onClick(View view) {
             favoriteMovieCursor.moveToPosition(getAdapterPosition());
-            onFavoriteMovieClickListener.onFavoriteMovieClick(favoriteMovieCursor.getLong(FavoriteActivity.INDEX_FAVORITE_MOVIE_ID));
+            long favoriteMovieId = favoriteMovieCursor.getLong(FavoriteActivity.INDEX_FAVORITE_MOVIE_ID);
+            int favoriteMovieTMDBId = favoriteMovieCursor.getInt(FavoriteActivity.INDEX_FAVORITE_MOVIE_TMDB_ID);
+            onFavoriteMovieClickListener.onFavoriteMovieClick(favoriteMovieId,favoriteMovieTMDBId);
         }
     }
 }
