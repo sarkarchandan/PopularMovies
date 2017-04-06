@@ -192,6 +192,7 @@ public class DetailActivity extends AppCompatActivity implements
         }else {
             tabLayout_detail_Activity_resourceType_switcher.getTabAt(0).select();
         }
+        fetchMovieReviewData();
         fetchMovieTrailersData();
     }
 
@@ -344,9 +345,8 @@ public class DetailActivity extends AppCompatActivity implements
 
         //Configuring the Resource Switcher RecyclerView.
         recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
         movieTrailerResourceAdapter.setOnMovieTrailerClikcListener(this);
-
+        recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
     }
 
     /**
@@ -494,6 +494,9 @@ public class DetailActivity extends AppCompatActivity implements
             Log.d(TAG,"Cursor Size: "+selectedMovieDataCursor.getCount());
             selectedMovieDataCursor.moveToFirst();
             displayMovieDetails(selectedMovieDataCursor);
+            //Setting the Adapter to display the Movie Trailers and Review in RecyclerView
+            recyclerView_activity_Detail_resource_switcher.setAdapter(movieReviewResourceAdapter);
+            recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
         }
         showData();
     }
@@ -630,10 +633,15 @@ public class DetailActivity extends AppCompatActivity implements
         return markedAsFavorite;
     }
 
+    /**
+     * Launches the Movie Trailer in the Browser or native installed YouTube Application with an
+     * implicit Intent
+     * @param movieTrailerYoutubeKey
+     */
     @Override
     public void onMovieTrailerClick(String movieTrailerYoutubeKey) {
         Intent youTubeTrailerIntent = new Intent(Intent.ACTION_VIEW
-                , Uri.parse("vnd.youtube://" + movieTrailerYoutubeKey));
+                , Uri.parse(getResources().getString(R.string.youTube_prefix_scheme) + movieTrailerYoutubeKey));
         if(youTubeTrailerIntent.resolveActivity(getPackageManager()) !=null){
             startActivity(youTubeTrailerIntent);
         }else {

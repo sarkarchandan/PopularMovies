@@ -83,6 +83,17 @@ public class MovieDataAdapter extends RecyclerView.Adapter<MovieDataAdapter.Movi
     }
 
     /**
+     * Replaces the Cursor with a new Cursor
+     * @param newCursor
+     */
+    public void swapCursor(Cursor newCursor){
+        if(newCursor != null){
+            movieCursor = newCursor;
+        }
+        notifyDataSetChanged();
+    }
+
+    /**
      * Returns the displayable ItemCount of the data source
      * @return // Integer
      */
