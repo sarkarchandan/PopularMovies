@@ -15,7 +15,8 @@
 ##### This Project is currently in development. It could result in unexpected behavior.
 
 ##### Following are some sample executions:
-<img src="https://cloud.githubusercontent.com/assets/19269229/24726064/5e9b6f38-1a51-11e7-8e6e-9b00dfeb561f.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726089/71961480-1a51-11e7-9c1a-35ba86c0a214.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726115/82f10640-1a51-11e7-8356-7ecf08df2310.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726130/903b3d0c-1a51-11e7-9a60-9e522fbc959f.png" width="150" height="250">
+<img src="https://cloud.githubusercontent.com/assets/19269229/24726064/5e9b6f38-1a51-11e7-8e6e-9b00dfeb561f.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24995276/9063d608-202e-11e7-94fb-bb6bc694ebe9.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726115/82f10640-1a51-11e7-8356-7ecf08df2310.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726130/903b3d0c-1a51-11e7-9a60-9e522fbc959f.png" width="150" height="250">
+
 
 ## Authentication
 ##### In order to request for the movies data using the movie database api we need an API Key which is unique to every user account registered with the movie database. The user need to [register](https://www.themoviedb.org/account/signup) with the movie database.
