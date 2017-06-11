@@ -257,7 +257,7 @@ public class DetailActivity extends AppCompatActivity implements
      */
     private void displayMovieDetails(Cursor selectedMovieDataCursor){
 
-        fetchMovieTrailersData();
+        fetchMovieReviewData();
 
         if(selectedMovieDataCursor.getCount() > 0){
             selectedMovieDataCursor.moveToFirst();
@@ -302,6 +302,7 @@ public class DetailActivity extends AppCompatActivity implements
                 Toast.makeText(context,getString(R.string.no_connectivity),Toast.LENGTH_SHORT).show();
             }
         }
+        fetchMovieTrailersData();
     }
 
     /**
@@ -320,12 +321,16 @@ public class DetailActivity extends AppCompatActivity implements
         AsyncTask fetchMovieTrailerAsyncTask = new AsyncTask() {
             @Override
             protected Object doInBackground(Object[] objects) {
+
                 Cursor cursor = getContentResolver().query(selectedMovieTrailerDataUri
                         ,DISPLAY_MOVIE_TRAILER_PROJECTION
                         ,null
                         ,null
                         ,null
                         ,null);
+
+                Log.d(TAG,"URI: "+selectedMovieTrailerDataUri);
+                Log.d(TAG,"Count: "+cursor.getCount());
                 return cursor;
             }
         };
@@ -347,6 +352,7 @@ public class DetailActivity extends AppCompatActivity implements
         recyclerView_activity_Detail_resource_switcher.setLayoutManager(new LinearLayoutManager(this));
         movieTrailerResourceAdapter.setOnMovieTrailerClikcListener(this);
         recyclerView_activity_Detail_resource_switcher.setAdapter(movieTrailerResourceAdapter);
+
     }
 
     /**

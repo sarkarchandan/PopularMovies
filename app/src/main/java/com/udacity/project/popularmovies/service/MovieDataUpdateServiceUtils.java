@@ -3,6 +3,7 @@ package com.udacity.project.popularmovies.service;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.Driver;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
@@ -19,11 +20,13 @@ import java.util.concurrent.TimeUnit;
 public class MovieDataUpdateServiceUtils {
 
     //Time interval the Job needs to wait before it starts (in hours)
-    private static final int UPDATE_INTERVAL_HOURS = 12;
+    private static final int UPDATE_INTERVAL_HOURS = 3;
     //Converting the interval of Job in to seconds
     private static final int UPDATE_INTERVAL_SECONDS = (int) TimeUnit.HOURS.toSeconds(UPDATE_INTERVAL_HOURS);
     //Time that we want the Job to have as the scope of execution
-    private static final int EXECUTION_SCOPE_SECONDS = UPDATE_INTERVAL_SECONDS;
+    private static final int EXECUTION_SCOPE_MINUTES = 15;
+    //Converting the execution scope in seconds
+    private static final int EXECUTION_SCOPE_SECONDS = (int) TimeUnit.MINUTES.toSeconds(EXECUTION_SCOPE_MINUTES);
 
     //Identity of our Job
     private static final String UPDATE_JOB_TAG = "movie-update-tag";
@@ -54,6 +57,7 @@ public class MovieDataUpdateServiceUtils {
                 .setRecurring(true)
                 .setTrigger(Trigger.executionWindow(UPDATE_INTERVAL_HOURS
                         ,UPDATE_INTERVAL_HOURS+EXECUTION_SCOPE_SECONDS))
+                .setConstraints(Constraint.ON_ANY_NETWORK)
                 .setReplaceCurrent(true)
                 .build();
         //Scheduling the Job

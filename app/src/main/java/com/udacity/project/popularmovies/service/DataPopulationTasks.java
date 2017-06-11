@@ -200,6 +200,7 @@ public class DataPopulationTasks {
 
                     String movieTitle = movieDataObject.getString(MOVIE_ORIGINAL_TITLE);
 
+                    //Check if the Movie is pre-existing or not
                     if(!isExistingMovie(context,movieTitle)) {
                         //Constructing the Uri to the Movie Poster
                         Uri moviePosterUri = Uri.parse(MOVIE_POSTER_BASE_URL).buildUpon()

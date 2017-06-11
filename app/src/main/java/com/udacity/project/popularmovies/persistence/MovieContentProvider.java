@@ -84,7 +84,7 @@ public class MovieContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-        final SQLiteDatabase sqLiteDatabase = movieDBHelper.getReadableDatabase();
+        SQLiteDatabase sqLiteDatabase = movieDBHelper.getReadableDatabase();
         int match = sUriMatcher.match(uri);
         Cursor returnCursor;
         switch (match){
@@ -184,7 +184,9 @@ public class MovieContentProvider extends ContentProvider {
             default:
                 throw new UnsupportedOperationException("An Error Occurred while querying with the Uri: "+uri);
         }
+        //sqLiteDatabase.close();
         returnCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        Log.d(TAG, "CP Count: "+ returnCursor.getCount());
         return returnCursor;
     }
 

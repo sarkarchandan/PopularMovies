@@ -37,7 +37,7 @@ public class MovieDataUpdateFirebaseJobService extends JobService{
                  * Status Code 429 for too many requests.
                  */
                 noOfMoviesUpdated = DataPopulationTasks.executeTask(context,DataPopulationTasks.ACTION_POPULATE_MOVIE_DATA, DetailActivity.MOVIE_ID_DEFAULT_VALUE);
-                if(noOfMoviesUpdated != 0){
+                if(noOfMoviesUpdated > 0){
                     NotificationUtils.createMovieUpdateNotification(context);
                 }
                 return null;

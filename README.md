@@ -15,7 +15,7 @@
 ##### This Project is currently in development. It could result in unexpected behavior.
 
 ##### Following are some sample executions:
-<img src="https://cloud.githubusercontent.com/assets/19269229/24726064/5e9b6f38-1a51-11e7-8e6e-9b00dfeb561f.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24995276/9063d608-202e-11e7-94fb-bb6bc694ebe9.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726115/82f10640-1a51-11e7-8356-7ecf08df2310.png" width="150" height="250"><img src="https://cloud.githubusercontent.com/assets/19269229/24726130/903b3d0c-1a51-11e7-9a60-9e522fbc959f.png" width="150" height="250">
+<img src="https://user-images.githubusercontent.com/19269229/27009924-f9678c28-4e99-11e7-83fa-7c6c35d53478.png" width="150" height="250"> <img src="https://user-images.githubusercontent.com/19269229/27009939-11d168b0-4e9a-11e7-9579-f7ef4bf8e22b.png" width="150" height="250"> <img src="https://user-images.githubusercontent.com/19269229/27009942-25b84c0e-4e9a-11e7-83ff-6f7de0b371e8.png" width="150" height="250"> <img src="https://user-images.githubusercontent.com/19269229/27009944-35c4412a-4e9a-11e7-8dcd-01d59ac802f0.png" width="150" height="250">
 
 
 ## Authentication

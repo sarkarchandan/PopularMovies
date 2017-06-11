@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,6 +23,8 @@ import butterknife.ButterKnife;
  * Created by chandan on 03.04.17.
  */
 public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrailerResourceAdapter.MovieTrailerItemViewHolder> {
+
+    private static final String TAG = MovieTrailerResourceAdapter.class.getSimpleName();
 
     //Defining Uri component parameters for getting YouTube video thumbnail
     private static final String YOUTUBE_VIDEO_THUMBNAIL_BASE_URI = "http://img.youtube.com/vi/";
@@ -70,6 +73,8 @@ public class MovieTrailerResourceAdapter extends RecyclerView.Adapter<MovieTrail
      */
     @Override
     public void onBindViewHolder(MovieTrailerItemViewHolder holder, int position) {
+        Log.d(TAG, "Element Nr. " + movieTrailerCursor.getCount());
+
         movieTrailerCursor.moveToPosition(position);
 
         String youTubeVideoId = movieTrailerCursor.getString(DetailActivity.INDEX_MOVIE_TRAILER_YOUTUBE_KEY);
